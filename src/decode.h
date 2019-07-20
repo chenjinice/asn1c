@@ -1,4 +1,4 @@
-#ifndef __DECODE _H__
+#ifndef __DECODE__H__
 #define __DECODE__H__
 
 

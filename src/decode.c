@@ -1,8 +1,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
-#include "decode.h"
 #include "encode.h"
+#include "decode.h"
 #include "MessageFrame.h"
 
 
