@@ -7,7 +7,8 @@
 #define  BUFF_SIZE 1792
 
 
-void write_to_file(char *path, uint8_t *buffer, int length);
+void encode_map(char *json_file,char *uper_file);
+void encode_rsi(char *json_file,char *uper_file);
 
 
 #endif
