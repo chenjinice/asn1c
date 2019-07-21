@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "encode.h"
-#include "decode.h"
+#include "common.h"
+#include "encode_map.h"
+#include "encode_rsi.h"
 
 
 void show_useage(){

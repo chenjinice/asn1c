@@ -1,4 +1,38 @@
 {
-	
+	"name" :"某条路的地图",
+	"nodes":[
+		{
+			"id" : 123,
+			"lon" : 1234567,
+			"lat"  : 7654321,
+			"links" : [
+				{
+					"upstreamNodeId" : 11,
+					"laneWidth" : 350,
+					"lanes" : [
+						{
+							"laneID" : 1,
+							"laneType" : 2,
+							"points" : [
+								{"lon":1000,"lat":1100} ,
+								{"lon":2000,"lat":2200} 
+							]
+						},
+						{
+							"laneID" : 2,
+							"laneType" : 3,
+							"points" : [
+								{"lon":1000,"lat":1100} ,
+								{"lon":2000,"lat":2200} ,
+								{"lon":3000,"lat":3300} 
+							]
+						}
+					]
+				}
+			]
+		}
 
+	]
+
+	
 }
