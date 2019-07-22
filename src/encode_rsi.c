@@ -5,7 +5,6 @@
 #include "encode_rsi.h"
 #include "common.h"
 
-
 void encode_rsi(char *json_file, char *uper_file)
 {
     MessageFrame_t *msgframe = NULL;
@@ -14,7 +13,6 @@ void encode_rsi(char *json_file, char *uper_file)
 
     cJSON *json = read_json(json_file);
     if(json == NULL)return;
-
 
     msgframe = (MessageFrame_t*)malloc(sizeof(MessageFrame_t));
     memset(msgframe,0,sizeof(MessageFrame_t));
@@ -44,7 +42,13 @@ void encode_rsi(char *json_file, char *uper_file)
     }
 
     encode(uper_file,msgframe);
+
+    ASN_STRUCT_FREE(asn_DEF_MessageFrame, msgframe);
 }
 
-
+void print_rsi(MessageFrame_t *msg)
+{
+    RSI_t rsi = msg->choice.rsiFrame;
+    printf("lng = %ld,lat = %ld, alertType = %ld\n",rsi.refPos.Long,rsi.refPos.lat,rsi.alertType);
+}
 
