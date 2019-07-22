@@ -8,7 +8,6 @@
 
 
 //---------------------- check -----------------------------
-
 static int get_point_max(int *lon_max,int *lat_max,int pointBits)
 {
     int temp ,ret = -1;
@@ -28,7 +27,7 @@ static int get_point_max(int *lon_max,int *lat_max,int pointBits)
             *lat_max = 90*1e7;
             break;
         default:
-            printf("------pointBits error : invalid pointBits [%d]  . should be one in [24,28,32,36,44,48,64]\n",pointBits);
+            printf("------pointBits error : invalid pointBits [%d] . should be one in [24,28,32,36,44,48,64]\n",pointBits);
             return ret;
             break;
     }
@@ -41,7 +40,7 @@ static int check_points(cJSON *points,int pointBits)
     int point_num =  cJSON_GetArraySize(points);
     if( get_point_max(&lon_max,&lat_max,pointBits) != 0)return ret;
     printf("------point num = %d  [lon : +-%d , lat : +-%d]\n",point_num,lon_max,lat_max);
-    if(point_num < 2){printf("------point num < 2\n");return ret;}
+    if(point_num < 2){printf("------point error : num < 2\n");return ret;}
     for(i=0;i<point_num;i++){
         cJSON *point = cJSON_GetArrayItem(points,i);
         cJSON *lon = cJSON_GetObjectItem(point,"lon");
@@ -80,8 +79,8 @@ static int check_lanes(cJSON *lanes)
 static int check_links(cJSON *links){
     int ret = -1,i;
     int link_num =  cJSON_GetArraySize(links);
-    printf("--link num= %d \n",link_num);
-    if(link_num < 1){printf("--link num < 1\n");return ret;}
+    printf("--link num = %d \n",link_num);
+    if(link_num < 1){printf("--link error : num < 1\n");return ret;}
     for(i=0;i<link_num;i++){
         printf("--link[%d] : \n",i);
         cJSON *link = cJSON_GetArrayItem(links,i);
@@ -89,8 +88,8 @@ static int check_links(cJSON *links){
         cJSON *laneWidth = cJSON_GetObjectItem(link,"laneWidth");
         cJSON *lanes = cJSON_GetObjectItem(link,"lanes");
         if(upstreamNodeId == NULL){printf("----link error : has no upstreamNodeId\n");return ret;}
-        if(laneWidth == NULL){printf("----link error :has no laneWidth\n");return ret;}
-        if(lanes == NULL){printf("----link error :has no lanes\n");return ret;}
+        if(laneWidth == NULL){printf("----link error : has no laneWidth\n");return ret;}
+        if(lanes == NULL){printf("----link error : has no lanes\n");return ret;}
         int lane_num =  cJSON_GetArraySize(lanes);
         if(lane_num < 1){printf("----lane error : num < 1\n");return ret;}
         printf("----upstreamNodeId = %d , laneWidth = %d , lane_num = %d\n",upstreamNodeId->valueint,laneWidth->valueint,lane_num);
@@ -103,11 +102,10 @@ static int check_map_json(cJSON *json){
     int ret = -1,i;
     if(json == NULL)return ret;
 
-    cJSON *name = cJSON_GetObjectItem(json,"name");
     cJSON *nodes = cJSON_GetObjectItem(json,"nodes");
-    if(nodes == NULL){printf("error :no node\n");return ret;}
-    int node_num =  cJSON_GetArraySize(nodes);
-    printf("node num= %d\n",node_num);
+    if(nodes == NULL){printf("error : no node\n");return ret;}
+    int node_num = cJSON_GetArraySize(nodes);
+    printf("node num = %d\n",node_num);
     if(node_num < 1){printf("node error : num < 1\n");return ret;}
 
     for(i=0;i<node_num;i++){
@@ -132,7 +130,6 @@ static int check_map_json(cJSON *json){
 
 
 //---------------------- add -----------------------------
-
 static void add_points(PointList_t *pointlist,cJSON *points,int pointBits)
 {
     int i;
@@ -213,6 +210,9 @@ static void add_links(LinkList_t *linklist,cJSON *links)
 {
     int i;
     int link_num =  cJSON_GetArraySize(links);
+
+
+
     for(i=0;i<link_num;i++){
         cJSON *link = cJSON_GetArrayItem(links,i);
         Link_t *map_link = calloc(1,sizeof(Link_t));
@@ -236,11 +236,11 @@ void encode_map(char *json_file, char *uper_file)
 
     printf("———————— check map json start ————————\n");
     int ret = check_map_json(json);
-    if(ret ==0 )printf("———————— check map json end : \e[32;40mOK\e[0m ————————\n");
-    else{printf("———————— check map json end : \e[31;40mFAIL\e[0m ————————\n");return;}
+    if(ret == 0)printf("———————— check map json \e[32;40mOK\e[0m ————————\n");
+    else{printf("———————— check map json \e[31;40mFAIL\e[0m ————————\n");return;}
 
     cJSON *nodes = cJSON_GetObjectItem(json,"nodes");
-    int node_num =  cJSON_GetArraySize(nodes);
+    int node_num = cJSON_GetArraySize(nodes);
 
     msgframe = (MessageFrame_t*)calloc(1,sizeof(MessageFrame_t));
     msgframe->present = MessageFrame_PR_mapFrame;
@@ -273,7 +273,6 @@ void encode_map(char *json_file, char *uper_file)
 
 
 //---------------------- print map -----------------------------
-
 static void print_points(PointList_t *pointlist)
 {
     if(!pointlist)return;
@@ -295,32 +294,32 @@ static void print_points(PointList_t *pointlist)
             case PositionOffsetLL_PR_position_LL2:
                 lon = point->posOffset.offsetLL.choice.position_LL2.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL2.lat;
-                type = "LL1 : 28";
+                type = "LL2 : 28";
                 break;
             case PositionOffsetLL_PR_position_LL3:
                 lon = point->posOffset.offsetLL.choice.position_LL3.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL3.lat;
-                type = "LL1 : 32";
+                type = "LL3 : 32";
                 break;
             case PositionOffsetLL_PR_position_LL4:
                 lon = point->posOffset.offsetLL.choice.position_LL4.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL4.lat;
-                type = "LL1 : 36";
+                type = "LL4 : 36";
                 break;
             case PositionOffsetLL_PR_position_LL5:
                 lon = point->posOffset.offsetLL.choice.position_LL5.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL5.lat;
-                type = "LL1 : 44";
+                type = "LL5 : 44";
                 break;
             case PositionOffsetLL_PR_position_LL6:
                 lon = point->posOffset.offsetLL.choice.position_LL6.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL6.lat;
-                type = "LL1 : 48";
+                type = "LL6 : 48";
                 break;
             case PositionOffsetLL_PR_position_LatLon:
                 lon = point->posOffset.offsetLL.choice.position_LatLon.lon;
                 lat = point->posOffset.offsetLL.choice.position_LatLon.lat;
-                type = "LL1 : 64";
+                type = "LL_LatLon : 64";
                 break;
         }
         printf("------point[%d] : [%s] lon = %ld , lat = %ld  \n",i,type,lon,lat);
@@ -365,7 +364,7 @@ void print_map(MessageFrame_t *msg)
         printf("node[%d] :\n",i);
         Node_t *node = map.nodes.list.array[i];
         LinkList_t *linklist = node->inLinks;
-        printf("--id=%ld,lon=%ld,lat=%ld\n",node->id.id,node->refPos.Long,node->refPos.lat);
+        printf("--id = %ld , lon = %ld , lat= %ld\n",node->id.id,node->refPos.Long,node->refPos.lat);
         print_links(linklist);
     }
 }

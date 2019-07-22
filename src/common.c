@@ -11,7 +11,7 @@ int get_file_size(char *path)
     struct stat statbuff;
 
     if(stat(path, &statbuff) < 0){
-        printf("%s : get file size error \n",path);
+        printf("%s : get file status fail\n",path);
         perror("error ");
         return ret;
     }
@@ -95,6 +95,8 @@ MessageFrame_t *decode(char *path)
         ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
         msg = NULL;
         printf("decode \e[31;40mfail\e[0m\n");
+    }else{
+        printf("decode \e[32;40mOK\e[0m\n");
     }
     return msg;
 }
@@ -110,7 +112,7 @@ void encode(char *path, MessageFrame_t *msg)
         return;
     }
     if (rval.encoded > BUFF_SIZE) {
-        printf("encode \e[31;40mfail\e[0m : size(%d) > %d \n",rval.encoded,BUFF_SIZE);
+        printf("encode \e[31;40mfail\e[0m : size(%d) > buffer_size(%d) \n",rval.encoded,BUFF_SIZE);
         return;
     }
     printf("encode \e[32;40mOK\e[0m \n");
