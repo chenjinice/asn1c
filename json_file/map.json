@@ -1,0 +1,64 @@
+{
+	"1" :"pointBits 指多少比特来保存经纬度2个值,类型:24,28,32,36,44,48,64.前6种表示相对参考点的偏移值，64表示绝对的经纬度值",
+	"2" :"speedLimits,1-9个元素,每个元素中 : type 为 0-12,  speed 为 0～163.82 ，单位为 m/s ",  
+	"关于地图" :"某条路的地图",
+
+
+	"nodes":[
+		{
+			"id" : 123,
+			"lon" : 1234567,
+			"lat"  : 7654321,
+			"links" : [
+				{
+					"upstreamNodeId" : 11,
+					"laneWidth" : 350,
+					"speedLimits" : [
+						{"type":1,"speed":10},
+						{"type":2,"speed":20},
+						{"type":3,"speed":30}
+					],
+					"lanes" : [
+						{
+							"laneID" : 1,
+							"pointBits" : 44,
+							"connectsTo" : [
+								{"remoteIntersection": 1,"connectingLane":2,"phaseId": 1}
+							],
+							"points" : [
+								{"lon":-1000,"lat":1100} ,
+								{"lon":2000,"lat":-2000} ,
+								{"lon":-1000,"lat":1100} ,
+								{"lon":2000,"lat":-2000} ,
+								{"lon":2000,"lat":1300} ,
+								{"lon":2000,"lat":1200} ,
+								{"lon":-2000,"lat":-1200} 
+							]
+						},
+						{
+							"laneID" : 2,
+							"pointBits" : 28,
+							"points" : [
+								{"lon":1000,"lat":1100} ,
+								{"lon":2000,"lat":2200} ,
+								{"lon":3000,"lat":3300} ,
+								{"lon":1000,"lat":1100} ,
+								{"lon":1000,"lat":1100} ,
+								{"lon":2000,"lat":2200} ,
+								{"lon":3000,"lat":3300} ,
+								{"lon":1000,"lat":1100} ,
+								{"lon":2000,"lat":2200} 
+							]
+						}
+					]
+				}
+			]
+		}
+
+	]
+
+	
+}
+
+
+

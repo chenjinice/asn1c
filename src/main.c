@@ -8,8 +8,11 @@
 
 void show_useage(){
     printf("ltev_tool :  \n");
+    // 从文件解码
     printf("-d    file : decode from file\n");
+    // 从json文件编码 map，并保持到文件
     printf("-map  json_file per_file : encode map from json_file to per_file\n");
+    // 从json文件编码 rsi，并保持到文件
     printf("-rsi  json_file per_file : encode rsi from json_file to per_file\n");
 
 }

@@ -5,6 +5,7 @@
 #include "MessageFrame.h"
 
 
+// 获取文件大小
 int get_file_size(char *path)
 {
     int ret = -1;
@@ -18,6 +19,12 @@ int get_file_size(char *path)
     return statbuff.st_size;
 }
 
+
+/*
+ * 读取文件内容，并保存到 buffer,
+ * 如果读取成功，buffer需要手动释放
+ * 返回值： 读取到的数据大小
+ */
 int read_file(char *path,uint8_t **buffer)
 {
     int ret = -1;
@@ -45,6 +52,8 @@ int read_file(char *path,uint8_t **buffer)
     return filesize;
 }
 
+
+//  把buffer内容保存到文件中
 void write_file(char *path, uint8_t *buffer, int length)
 {
     int fd = open(path,O_WRONLY|O_CREAT|O_TRUNC,0666);
@@ -61,6 +70,10 @@ void write_file(char *path, uint8_t *buffer, int length)
     close(fd);
 }
 
+/*
+ * 从文件读取数据，并用cJSON解析,
+ * 解析成功的话，需要调用 cJSON_Delete 函数释放
+ */
 cJSON *read_json(char *path)
 {
     cJSON *json = NULL;
@@ -79,6 +92,10 @@ cJSON *read_json(char *path)
 }
 
 
+/*
+ * 读取文件内容，并用asn解码函数解码
+ * 解码成功的话，需要调用 ASN_STRUCT_FREE 函数释放
+ */
 MessageFrame_t *decode(char *path)
 {
     asn_dec_rval_t rval;
@@ -101,6 +118,7 @@ MessageFrame_t *decode(char *path)
     return msg;
 }
 
+// asn编码 MessageFrame_t 类型数据，并将编码结果保存到文件
 void encode(char *path, MessageFrame_t *msg)
 {
     uint8_t buffer[BUFF_SIZE];
