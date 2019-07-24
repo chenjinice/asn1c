@@ -6,43 +6,67 @@
 #include "encode_map.h"
 #include "common.h"
 
+#define LOG_SIZE    300
+#define PRE_SIZE    40
+
+#define LON_MAX     (180*1e7)
+#define LAT_MAX     (90*1e7)
+
+#define LANEWIDTH_MAX 32767
 
 #define NODEID_MAX  65535
 #define NODEID_MIN  0
 #define LANEID_MAX  255
 #define LANEID_MIN  0
+#define PHASEID_MAX 255
+#define PHASEID_MIN 0
 
-#define LIST_MAX    32
-#define LIST_MIN    1
-
-#define POINTS_MAX  32
-#define POINTS_MIN  2
-
-#define SPEEDLIMIT_MAX 9
-#define SPEEDLIMIT_MIN 1
 #define SPEEDTYPE_MAX  SpeedLimitType_vehiclesWithTrailersNightMaxSpeed
 #define SPEEDTYPE_MIN  SpeedLimitType_unknown
 #define SPEED_MAX  163.82   // 8191*0.02
 #define SPEED_MIN  0.0
 #define SPEED_RESOLUTION  0.02
 
-#define CONNECT_MAX 8
-#define CONNECT_MIN 1
-
-//---------------------- check -----------------------------
 
 
+//---------------------- common -----------------------------
+static void get_pre(char *pre,char *name,int level)
+{
+    int i;
+    char *format = "|  ";
+    pre[0] = 0;
+    for(i=0;i<level;i++){
+        sprintf(pre+strlen(pre),"%s",format);
+    }
+    sprintf(pre+strlen(pre),"%s",name);
+}
 
-// 检查数量是否符合要求
-static int check_num(int num ,int max,int min,char *log)
+// 判断整数是否在范围内
+static int check_int(int num ,int min,int max,char *pre,char *name)
 {
     if( (num < min) || (num > max) ){
-        printf("%s error : value = %d, must be (%d .. %d)\n",log,num,min,max);
+        printf("%s.%s error : value = %d, must be (%d ~ %d)\n",pre,name,num,min,max);
         return -1;
     }else{
         return 0;
     }
 }
+
+// 判断浮点数是否在范围内
+static int check_double(double num ,double min,double max,char *pre,char *name)
+{
+    if( (num < min) || (num > max) ){
+        printf("%s.%s error : value = %lf, must be (%.2lf ~ %.2lf)\n",pre,name,num,min,max);
+        return -1;
+    }else{
+        return 0;
+    }
+}
+
+
+
+
+//---------------------- check -----------------------------
 
 /*
  * 获取不同 pointBits 类型的不同经纬度范围
@@ -50,9 +74,22 @@ static int check_num(int num ,int max,int min,char *log)
  * 例如 24 代表 12位数据保存经度，另外12位保持纬度
  * 注意：前6种类型，代表相对于参考点的经纬度偏移值， 而 64 不同，它代表的就是经纬度值
  */
-static int get_point_max(int *lon_max,int *lat_max,int pointBits)
+static void get_point_max(int *lon_max,int *lat_max,int pointBits)
 {
-    int temp ,ret = -1;
+    int temp;
+    if(pointBits >= 64){
+        *lon_max = LON_MAX;
+        *lat_max = LAT_MAX;
+    }else{
+        temp = pow(2,pointBits/2-1) - 1;
+        *lon_max = temp;
+        *lat_max = temp;
+    }
+}
+
+static int check_pointBits(int pointBits)
+{
+    int ret = -1;
     switch (pointBits) {
         case 24:
         case 28:
@@ -60,177 +97,257 @@ static int get_point_max(int *lon_max,int *lat_max,int pointBits)
         case 36:
         case 44:
         case 48:
-            temp = pow(2,pointBits/2-1) -1;
-            *lon_max = temp;
-            *lat_max = temp;
-            break;
         case 64:
-            *lon_max = 180*1e7;
-            *lat_max = 90*1e7;
-            break;
-        default:
-            printf("------pointBits error : invalid pointBits [%d] . must be one of [24,28,32,36,44,48,64]\n",pointBits);
-            return ret;
+            ret = 0;
             break;
     }
-    return 0;
+    return ret;
 }
 
 // 检查文件中的 json 数据是否符合 lanes 中的 points 要求
-static int check_points(cJSON *points,int pointBits)
+static int check_points(cJSON *points,int pointBits,int level)
 {
     int ret = -1,i,lon_max,lat_max,lon_int,lat_int;
-    int point_num =  cJSON_GetArraySize(points);
-    if( get_point_max(&lon_max,&lat_max,pointBits) != 0)return ret;
-    if(check_num(point_num,POINTS_MAX,POINTS_MIN,"------points num") !=0)return ret;
-    printf("------points num = %d (lon:+-%d,lat:+-%d)\n",point_num,lon_max,lat_max);
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"point",level);
 
-    for(i=0;i<point_num;i++){
+    get_point_max(&lon_max,&lat_max,pointBits);
+    printf("%s range == lat:+-%d , lon:+-%d\n",pre,lon_max,lat_max);
+
+    int count =  cJSON_GetArraySize(points);
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
         cJSON *point = cJSON_GetArrayItem(points,i);
         cJSON *lon = cJSON_GetObjectItem(point,"lon");
         cJSON *lat = cJSON_GetObjectItem(point,"lat");
+        if(!lon){printf("%s error : has no lon\n",pre);return ret;}
+        if(!lat){printf("%s error : has no lat\n",pre);return ret;}
         lon_int = lon->valueint;
         lat_int = lat->valueint;
-        if(!lon){printf("--------points error : has no lon\n");return ret;}
-        if(!lat){printf("--------points error : has no lat\n");return ret;}
-        if(check_num(lon_int,lon_max,-lon_max,"--------points lon") !=0 )return ret;
-        if(check_num(lat_int,lat_max,-lat_max,"--------points lat") !=0 )return ret;
-        printf("--------points[%d] : lon = %d , lat = %d\n",i,lon_int,lat_int);
+        if(check_int(lon_int,-lon_max,lon_max,pre,"lon") !=0 )return ret;
+        if(check_int(lat_int,-lat_max,lat_max,pre,"lat") !=0 )return ret;
+        sprintf(log+strlen(log),"lon=%d,lat=%d",lon_int,lat_int);
+        printf("%s\n",log);
     }
     return 0;
 }
 
 // 检查文件中的 json 数据是否符合 lanes 中的 connectsTo 要求
-static int check_connectsTo(cJSON *connectsTo)
+static int check_connectsTo(cJSON *connectsTo,int level)
 {
     int ret = -1,i;
-    int connect_num =  cJSON_GetArraySize(connectsTo);
-    if(check_num(connect_num,CONNECT_MAX,CONNECT_MIN,"------connectsTo num") !=0)return ret;
-    printf("------connectsTo num = %d\n",connect_num);
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"connectsTo",level);
 
-    for(i=0;i<connect_num;i++){
+    int count =  cJSON_GetArraySize(connectsTo);
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
         cJSON *connect = cJSON_GetArrayItem(connectsTo,i);
         cJSON *remoteIntersection = cJSON_GetObjectItem(connect,"remoteIntersection");
         cJSON *connectingLane = cJSON_GetObjectItem(connect,"connectingLane");
         cJSON *phaseId = cJSON_GetObjectItem(connect,"phaseId");
-        if(!remoteIntersection){printf("--------connectsTo error : has no remoteIntersection\n");return ret;}
-        if(check_num(remoteIntersection->valueint,NODEID_MAX,NODEID_MIN,"--------connectsTo remoteIntersection") != 0)return ret;
+
+        if(remoteIntersection == NULL){printf("%s error : has no remoteIntersection\n",pre);return ret;}
+        sprintf(log+strlen(log),"remoteIntersection=%d,",remoteIntersection->valueint);
+        if(connectingLane)sprintf(log+strlen(log),"*connectingLane=%d,",connectingLane->valueint);
+        if(phaseId)sprintf(log+strlen(log),"*phaseId=%d,",phaseId->valueint);
+        printf("%s\n",log);
+
+        if(check_int(remoteIntersection->valueint,NODEID_MIN,NODEID_MAX,pre,"remoteIntersection") != 0)return ret;
+        if(connectingLane){
+            if(check_int(connectingLane->valueint,LANEID_MIN,LANEID_MAX,pre,"connectingLane") != 0)return ret;
+        }
+        if(phaseId){
+            if(check_int(phaseId->valueint,PHASEID_MIN,PHASEID_MAX,pre,"phaseId") != 0)return ret;
+        }
     }
     return 0;
 }
 
 // 检查文件中的 json 数据是否符合 map 中的 lanes 要求
-static int check_lanes(cJSON *lanes)
+static int check_lanes(cJSON *lanes,int level)
 {
     int ret = -1,i;
-    int lane_num =  cJSON_GetArraySize(lanes);
-    if(check_num(lane_num,LIST_MAX,LIST_MIN,"----lanes num") !=0)return ret;
-    printf("----lanes num = %d\n",lane_num);
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"lane",level);
 
-    for(i=0;i<lane_num;i++){
-        printf("------lanes[%d] :\n",i);
+    int count =  cJSON_GetArraySize(lanes);
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
+        int points_count = 0;
+        int connectsTo_count = 0;
         cJSON *lane = cJSON_GetArrayItem(lanes,i);
         cJSON *laneID = cJSON_GetObjectItem(lane,"laneID");
         cJSON *points = cJSON_GetObjectItem(lane,"points");
         cJSON *pointBits = cJSON_GetObjectItem(lane,"pointBits");
         cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
-        if(laneID == NULL){printf("------lanes error : has no laneID\n");return ret;}
-        if(pointBits == NULL){printf("------lanes error : has no pointBits\n");return ret;}
-        if(check_num(laneID->valueint,LANEID_MAX,LANEID_MIN,"------lanes id") != 0)return ret;
-        printf("------laneID = %d , pointBits = %d\n",laneID->valueint,pointBits->valueint);
+        if(laneID == NULL){printf("%s error : has no laneID\n",pre);return ret;}
+        if(pointBits == NULL){printf("%s error : has no pointBits\n",pre);return ret;}
+        sprintf(log+strlen(log),"laneID=%d,pointBits=%d,",laneID->valueint,pointBits->valueint);
         if(points){
-            if(check_points(points,pointBits->valueint) != 0)return ret;
+            points_count = cJSON_GetArraySize(points);
+            sprintf(log+strlen(log),"*points[%d],",points_count);
         }
         if(connectsTo){
-            if(check_connectsTo(connectsTo) != 0)return ret;
+            connectsTo_count = cJSON_GetArraySize(connectsTo);
+            sprintf(log+strlen(log),"*connectsTo[%d],",connectsTo_count);
+        }
+        printf("%s\n",log);
+
+        if(check_int(laneID->valueint,LANEID_MIN,LANEID_MAX,pre,"laneID") != 0)return ret;
+        if( check_pointBits(pointBits->valueint) != 0){
+            printf("%s pointBits invalid : value = [%d]. must be [24,28,32,36,44,48,64]\n",pre,pointBits->valueint);
+            return ret;
+        }
+        if(points_count > 0){
+            // 国标 points 个数: 2 - 31 , optional ， 可以没有
+            if(check_int(points_count,2,31,pre,"points count") != 0)return ret;
+            if(check_points(points,pointBits->valueint,level+1) != 0)return ret;
+        }
+        if(connectsTo_count > 0){
+            // 国标 connectsTo 个数: 1 - 8 , optional ， 可以没有
+            if(check_int(points_count,2,31,pre,"connectsTo count") != 0)return ret;
+            if(check_connectsTo(connectsTo,level+1) != 0)return ret;
         }
     }
     return 0;
 }
 
 // 检查文件中的 json 数据是否符合 map 中的 speedlimits 要求
-static int check_speedLimits(cJSON *speedLimits)
+static int check_speedLimits(cJSON *speedLimits,int level)
 {
     int ret = -1,i;
-    int speedlimit_num = cJSON_GetArraySize(speedLimits);
-    if(check_num(speedlimit_num,SPEEDLIMIT_MAX,SPEEDLIMIT_MIN,"----speedLimits num") !=0)return ret;
-    printf("----speedLimits num = %d\n",speedlimit_num);
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"speedLimit",level);
 
-    for(i=0;i<speedlimit_num;i++){
+    int count = cJSON_GetArraySize(speedLimits);
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
         cJSON *limit = cJSON_GetArrayItem(speedLimits,i);
         cJSON *type = cJSON_GetObjectItem(limit,"type");
         cJSON *speed = cJSON_GetObjectItem(limit,"speed");
-        if(!type) {printf("------speedlimits error : no type\n");return ret;}
-        if(!speed){printf("------speedlimits error : no speed\n");return ret;}
+        if(!type) {printf("%s error : no type\n",pre);return ret;}
+        if(!speed){printf("%s error : no speed\n",pre);return ret;}
         int type_int = type->valueint;
         double speed_double = speed->valuedouble;
         double tmp = (speed_double/SPEED_RESOLUTION);   // 需要搞个中间值，要不算出来的 speed_int 不对
         int speed_int = tmp;
-        if( check_num(type_int,SPEEDTYPE_MAX,SPEEDTYPE_MIN,"------speedlimits type") != 0)return ret;
-        if( (speed_double < SPEED_MIN) || (speed_double > SPEED_MAX) ){
-            printf("------speedlimits error : speed = %.2lf , must be (%.0lf .. %.2lf)\n",speed_double,SPEED_MIN,SPEED_MAX);
-            return ret;
-        }
-        printf("------speedlimits[%d] : type = %d, speed = %.2lf [%d]\n",i,type_int,speed_double,speed_int);
+        sprintf(log+strlen(log),"type=%d,speed=%.2lf(%d)",type_int,speed_double,speed_int);
+        printf("%s\n",log);
+
+        if( check_int(type_int,SPEEDTYPE_MIN,SPEEDTYPE_MAX,pre,"type") != 0 )return ret;
+        if( check_double(speed_double,SPEED_MIN,SPEED_MAX,pre,"speed") !=0 )return ret;
     }
     return 0;
 }
 
 // 检查文件中的 json 数据是否符合 map 中的 links 要求
-static int check_links(cJSON *links){
+static int check_links(cJSON *links,int level)
+{
     int ret = -1,i;
-    int link_num =  cJSON_GetArraySize(links);
-    if(check_num(link_num,LIST_MAX,LIST_MIN,"--links num") !=0)return ret;
-    printf("--links num = %d\n",link_num);
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"link",level);
 
-    for(i=0;i<link_num;i++){
-        printf("----links[%d] : \n",i);
+    int count =  cJSON_GetArraySize(links);
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
+        int lanes_count = 0;
+        int speedLimits_count = 0;
         cJSON *link = cJSON_GetArrayItem(links,i);
         cJSON *upstreamNodeId = cJSON_GetObjectItem(link,"upstreamNodeId");
         cJSON *laneWidth = cJSON_GetObjectItem(link,"laneWidth");
         cJSON *lanes = cJSON_GetObjectItem(link,"lanes");
         cJSON *speedLimits = cJSON_GetObjectItem(link,"speedLimits");
-        if(upstreamNodeId == NULL){printf("----links error : has no upstreamNodeId\n");return ret;}
-        if(laneWidth == NULL){printf("----links error : has no laneWidth\n");return ret;}
-        if(lanes == NULL){printf("----links error : has no lanes\n");return ret;}
-        if( check_num(upstreamNodeId->valueint,NODEID_MAX,NODEID_MIN,"--links upstreamNodeId") !=0 )return ret;
-        printf("----upstreamNodeId = %d , laneWidth = %d\n",upstreamNodeId->valueint,laneWidth->valueint);
-        if(check_lanes(lanes) != 0)return ret;
+        if(upstreamNodeId == NULL){printf("%s error : has no upstreamNodeId\n",pre);return ret;}
+        if(laneWidth == NULL){printf("%s error : has no laneWidth\n",pre);return ret;}
+        if(lanes == NULL){printf("%s error : has no lanes\n",pre);return ret;}
+        lanes_count = cJSON_GetArraySize(lanes);
+        sprintf(log+strlen(log),"upstreamNodeId=%d,laneWidth=%d,lanes[%d],",upstreamNodeId->valueint,laneWidth->valueint,lanes_count);
         if(speedLimits){
-            if(check_speedLimits(speedLimits) != 0)return ret;
+            speedLimits_count = cJSON_GetArraySize(speedLimits);
+            sprintf(log+strlen(log),"*speedLimits[%d]",speedLimits_count);
+        }
+        printf("%s\n",log);
+
+        if(check_int(upstreamNodeId->valueint,NODEID_MIN,NODEID_MAX,pre,"upstreamNodeId") !=0)return ret;
+        if(check_int(laneWidth->valueint,0,LANEWIDTH_MAX,pre,"laneWidth") !=0)return ret;
+        // 国标 lanes 个数: 1 - 32
+        if(check_int(lanes_count,1,32,pre,"lanes") !=0)return ret;
+        if(check_lanes(lanes,level+1) != 0)return ret;
+        if(speedLimits_count > 0){
+            // 国标 speedLimits 个数: 1 - 9 , optional ， 可以没有
+            if(check_int(speedLimits_count,1,9,pre,"speedLimits count"));
+            if(check_speedLimits(speedLimits,level+1) != 0)return ret;
+        }
+    }
+    return 0;
+}
+
+// 检查文件中的 json 数据是否符合 nodes 要求
+static int check_nodes(cJSON *nodes,int level)
+{
+    int ret = -1,i;
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"node",level);
+
+    int count = cJSON_GetArraySize(nodes);
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
+        int links_count = 0;
+        cJSON *node = cJSON_GetArrayItem(nodes,i);
+        cJSON *id = cJSON_GetObjectItem(node,"id");
+        cJSON *lon = cJSON_GetObjectItem(node,"lon");
+        cJSON *lat = cJSON_GetObjectItem(node,"lat");
+        cJSON *links = cJSON_GetObjectItem(node,"links");
+        if(id == NULL){printf("%s error : has no id\n",pre);return ret;}
+        if(lon == NULL){printf("%s error : has no lon\n",pre);return ret;}
+        if(lat == NULL){printf("%s error : has no lat\n",pre);return ret;}
+        sprintf(log+strlen(log),"id=%d,lon=%d,lat=%d,",id->valueint,lon->valueint,lat->valueint);
+        if(links){
+            links_count =  cJSON_GetArraySize(links);
+            sprintf(log+strlen(log),"*links[%d]",links_count);
+        }
+        printf("%s\n",log);
+
+        if(check_int(id->valueint,NODEID_MIN,NODEID_MAX,pre,"id") != 0)return ret;
+        if(check_int(lon->valueint,-LON_MAX,LON_MAX,pre,"lon") != 0)return ret;
+        if(check_int(lat->valueint,-LAT_MAX,LAT_MAX,pre,"lat") != 0)return ret;
+        if(links_count > 0){
+            // 国标 links 个数: 1 - 32 , optional ， 可以没有
+            if(check_int(links_count,1,32,pre,"links count") !=0)return ret;
+            if(check_links(links,level+1) != 0)return ret;
         }
     }
     return 0;
 }
 
 // 检查文件中的 json 数据是否符合 map 要求
-static int check_map_json(cJSON *json){
-    int ret = -1,i;
+static int check_map_json(cJSON *json)
+{
+    int ret = -1,level = 0;
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
     if(json == NULL)return ret;
 
+    get_pre(pre,"map",level);
+    sprintf(log,"%s : ",pre);
+
+    int nodes_count = 0 ;
     cJSON *nodes = cJSON_GetObjectItem(json,"nodes");
-    if(nodes == NULL){printf("error : no nodes\n");return ret;}
-    int node_num = cJSON_GetArraySize(nodes);
-    if(check_num(node_num,LIST_MAX,LIST_MIN,"nodes num") !=0)return ret;
-    printf("nodes num = %d\n",node_num);
+    if(nodes == NULL){printf("%s error : no nodes\n",pre);return ret;}
+    nodes_count = cJSON_GetArraySize(nodes);
+    sprintf(log+strlen(log),"nodes[%d]",nodes_count);
+    printf("%s \n",log);
 
-    for(i=0;i<node_num;i++){
-        printf("--nodes[%d] : \n",i);
-        cJSON *node = cJSON_GetArrayItem(nodes,i);
-        cJSON *id = cJSON_GetObjectItem(node,"id");
-        cJSON *lon = cJSON_GetObjectItem(node,"lon");
-        cJSON *lat = cJSON_GetObjectItem(node,"lat");
-        cJSON *links = cJSON_GetObjectItem(node,"links");
-        if(id == NULL){printf("--nodes error : has no id\n");return ret;}
-        if(lon == NULL){printf("--nodes error : has no lon\n");return ret;}
-        if(lat == NULL){printf("--nodes error : has no lat\n");return ret;}
-        if(check_num(id->valueint,NODEID_MAX,NODEID_MIN,"--nodes id") != 0)return ret;
-        printf("--id = %d , lon = %d , lat = %d\n",id->valueint,lon->valueint,lat->valueint);
-
-        if(links){
-            if(check_links(links) != 0)return ret;
-        }
-    }
+    // 国标 nodes 个数: 1 - 32
+    if(check_int(nodes_count,1,32,pre,"nodes count") !=0)return ret;
+    if(check_nodes(nodes,level+1) != 0)return ret;
 
     return 0;
 }
@@ -295,22 +412,55 @@ static void add_points(PointList_t *pointlist,cJSON *points,int pointBits)
     }
 }
 
+// 给 lane 添加 connectsTo
+static void add_connectsTo(ConnectsToList_t *list,cJSON *connectsTo)
+{
+    int i;
+    int count =  cJSON_GetArraySize(connectsTo);
+
+    for(i=0;i<count;i++){
+        cJSON *connect = cJSON_GetArrayItem(connectsTo,i);
+        Connection_t *map_con = calloc(1,sizeof(Connection_t));
+        cJSON *remoteIntersection = cJSON_GetObjectItem(connect,"remoteIntersection");
+        cJSON *connectingLane = cJSON_GetObjectItem(connect,"connectingLane");
+        cJSON *phaseId = cJSON_GetObjectItem(connect,"phaseId");
+        map_con->remoteIntersection.id = remoteIntersection->valueint;
+        if(connectingLane){
+            map_con->connectingLane = calloc(1,sizeof(ConnectingLane_t));
+            map_con->connectingLane->lane = connectingLane->valueint;
+        }
+        if(phaseId){
+            map_con->phaseId = calloc(1,sizeof(PhaseID_t));
+            *map_con->phaseId = phaseId->valueint;
+        }
+
+        ASN_SET_ADD(&list->list,map_con);
+    }
+}
+
 // 给 link 添加 lanes
 static void add_lanes(LaneList_t *lanelist, cJSON *lanes)
 {
     int i;
-    int lane_num =  cJSON_GetArraySize(lanes);
-    for(i=0;i<lane_num;i++){
+    int count =  cJSON_GetArraySize(lanes);
+
+    for(i=0;i<count;i++){
         cJSON *lane = cJSON_GetArrayItem(lanes,i);
         Lane_t *map_lane = calloc(1,sizeof(Lane_t));
         long id = cJSON_GetObjectItem(lane,"laneID")->valueint;
         int pointBits = cJSON_GetObjectItem(lane,"pointBits")->valueint;
         cJSON *points = cJSON_GetObjectItem(lane,"points");
+        cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
         map_lane->laneID = id;
-        if(points){
+        if( points && (cJSON_GetArraySize(points) > 1) ){
             PointList_t *pointlist = calloc(1,sizeof(PointList_t));
             map_lane->points = pointlist;
             add_points(pointlist,points,pointBits);
+        }
+        if( connectsTo && (cJSON_GetArraySize(connectsTo) > 0 ) ){
+            ConnectsToList_t *connectlist = calloc(1,sizeof(ConnectsToList_t));
+            map_lane->connectsTo = connectlist;
+            add_connectsTo(connectlist,connectsTo);
         }
 
         ASN_SET_ADD(&lanelist->list,map_lane);
@@ -321,9 +471,9 @@ static void add_lanes(LaneList_t *lanelist, cJSON *lanes)
 static void add_speedLimits(SpeedLimitList_t *speedlist,cJSON *speedlimits)
 {
     int i;
-    int speed_num = cJSON_GetArraySize(speedlimits);
+    int count = cJSON_GetArraySize(speedlimits);
 
-    for(i=0;i<speed_num;i++){
+    for(i=0;i<count;i++){
         RegulatorySpeedLimit_t *map_speed = calloc(1,sizeof(RegulatorySpeedLimit_t));
         cJSON *limit = cJSON_GetArrayItem(speedlimits,i);
         int type = cJSON_GetObjectItem(limit,"type")->valueint;
@@ -342,9 +492,9 @@ static void add_speedLimits(SpeedLimitList_t *speedlist,cJSON *speedlimits)
 static void add_links(LinkList_t *linklist,cJSON *links)
 {
     int i;
-    int link_num =  cJSON_GetArraySize(links);
+    int count =  cJSON_GetArraySize(links);
 
-    for(i=0;i<link_num;i++){
+    for(i=0;i<count;i++){
         cJSON *link = cJSON_GetArrayItem(links,i);
         Link_t *map_link = calloc(1,sizeof(Link_t));
         long upstreamNodeId = cJSON_GetObjectItem(link,"upstreamNodeId")->valueint;
@@ -354,7 +504,7 @@ static void add_links(LinkList_t *linklist,cJSON *links)
         map_link->upstreamNodeId.id = upstreamNodeId;
         map_link->laneWidth = laneWidth;
         add_lanes(&map_link->lanes,lanes);
-        if(speedlimits){
+        if( speedlimits && (cJSON_GetArraySize(speedlimits) > 0) ){
             SpeedLimitList_t *speedlist = calloc(1,sizeof(SpeedLimitList_t));
             map_link->speedLimits = speedlist;
             add_speedLimits(speedlist,speedlimits);
@@ -372,11 +522,13 @@ void encode_map(char *json_file, char *uper_file)
     cJSON *json = read_json(json_file);
     if(!json)return;
 
+    char *pre = "——————————";
+    char *suf = "——————————";
     // 检查 json 文件是否符合 map 数据的要求
-    printf("———————— check map json start ————————\n");
+    printf("%s check map json start %s\n",pre,suf);
     int ret = check_map_json(json);
-    if(ret == 0)printf("———————— check map json \e[32;40mOK\e[0m ————————\n");
-    else{printf("———————— check map json \e[31;40mFAIL\e[0m ————————\n");return;}
+    if(ret == 0)printf("%s check map json \e[32;40mOK\e[0m %s\n",pre,suf);
+    else{printf("%s check map json \e[31;40mFAIL\e[0m %s\n",pre,suf);return;}
 
     cJSON *nodes = cJSON_GetObjectItem(json,"nodes");
     int node_num = cJSON_GetArraySize(nodes);
@@ -396,7 +548,7 @@ void encode_map(char *json_file, char *uper_file)
         map_node->id.id = id;
         map_node->refPos.Long = lon;
         map_node->refPos.lat = lat;
-        if(links){
+        if( links && (cJSON_GetArraySize(links) > 0) ){
             LinkList_t *inLinks = calloc(1,sizeof(LinkList_t));
             map_node->inLinks = inLinks;
             add_links(inLinks,links);
@@ -502,37 +654,52 @@ static void print_speedLimits(SpeedLimitList_t *speedlist)
 
 
 // 打印 map 中的 links
-static void print_links(LinkList_t *linklist)
+static void print_links(LinkList_t *linklist,int level)
 {
     if(!linklist)return;
 
     int i;
-    int link_num = linklist->list.count;
-    printf("--links num = %d\n",link_num);
-    for(i=0;i<link_num;i++){
-        printf("----links[%d] :\n",i);
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"link",level);
+
+    int count = linklist->list.count;
+    for(i=0;i<count;i++){
         Link_t *link = linklist->list.array[i];
-        printf("----upstreamNodeId = %ld , laneWidth = %ld\n",link->upstreamNodeId.id,link->laneWidth);
+        int lane_count = link->lanes.list.count;
+        int limit_count = 0;
+        if(link->speedLimits)limit_count = link->speedLimits->list.count;
+        printf("%s[%d] : upstreamNodeId=%ld,laneWidth=%ld,lanes[%d],*speedLimits[%d]\n",pre,i,link->upstreamNodeId.id,link->laneWidth,lane_count,limit_count);
         print_lanes(&link->lanes);
         print_speedLimits(link->speedLimits);
     }
 }
 
+void print_nodes(NodeListltev_t *nodelist,int level)
+{
+    int i;
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"node",level);
+
+    int count = nodelist->list.count;
+    for(i=0;i<count;i++){
+        Node_t *node = nodelist->list.array[i];
+        LinkList_t *linklist = node->inLinks;
+        printf("%s[%d] : id=%ld,lon=%ld,lat=%ld\n",pre,i,node->id.id,node->refPos.Long,node->refPos.lat);
+        print_links(linklist,level+1);
+    }
+}
 
 // 打印 map 数据
 void print_map(MessageFrame_t *msg)
 {
-    int i;
+    int level = 0;
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"map",level);
+
     MAP_t map = msg->choice.mapFrame;
-    int node_num = map.nodes.list.count;
-    printf("nodes num = %d\n",node_num);
-    for(i=0;i<node_num;i++){
-        printf("--nodes[%d] :\n",i);
-        Node_t *node = map.nodes.list.array[i];
-        LinkList_t *linklist = node->inLinks;
-        printf("--id = %ld , lon = %ld , lat= %ld\n",node->id.id,node->refPos.Long,node->refPos.lat);
-        print_links(linklist);
-    }
+    printf("%s : nodes[%d]\n",pre,map.nodes.list.count);
+
+    print_nodes(&map.nodes,level+1);
 }
 
 
