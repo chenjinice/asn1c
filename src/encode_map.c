@@ -6,62 +6,6 @@
 #include "encode_map.h"
 #include "common.h"
 
-#define LOG_SIZE    300
-#define PRE_SIZE    40
-
-#define LON_MAX     (180*1e7)
-#define LAT_MAX     (90*1e7)
-
-#define LANEWIDTH_MAX 32767
-
-#define NODEID_MAX  65535
-#define NODEID_MIN  0
-#define LANEID_MAX  255
-#define LANEID_MIN  0
-#define PHASEID_MAX 255
-#define PHASEID_MIN 0
-
-#define SPEEDTYPE_MAX  SpeedLimitType_vehiclesWithTrailersNightMaxSpeed
-#define SPEEDTYPE_MIN  SpeedLimitType_unknown
-#define SPEED_MAX  163.82   // 8191*0.02
-#define SPEED_MIN  0.0
-#define SPEED_RESOLUTION  0.02
-
-
-
-//---------------------- common -----------------------------
-static void get_pre(char *pre,char *name,int level)
-{
-    int i;
-    char *format = "|  ";
-    pre[0] = 0;
-    for(i=0;i<level;i++){
-        sprintf(pre+strlen(pre),"%s",format);
-    }
-    sprintf(pre+strlen(pre),"%s",name);
-}
-
-// 判断整数是否在范围内
-static int check_int(int num ,int min,int max,char *pre,char *name)
-{
-    if( (num < min) || (num > max) ){
-        printf("%s.%s error : value = %d, must be (%d ~ %d)\n",pre,name,num,min,max);
-        return -1;
-    }else{
-        return 0;
-    }
-}
-
-// 判断浮点数是否在范围内
-static int check_double(double num ,double min,double max,char *pre,char *name)
-{
-    if( (num < min) || (num > max) ){
-        printf("%s.%s error : value = %lf, must be (%.2lf ~ %.2lf)\n",pre,name,num,min,max);
-        return -1;
-    }else{
-        return 0;
-    }
-}
 
 
 
@@ -212,6 +156,7 @@ static int check_lanes(cJSON *lanes,int level)
             if(check_int(points_count,2,31,pre,"connectsTo count") != 0)return ret;
             if(check_connectsTo(connectsTo,level+1) != 0)return ret;
         }
+        printf("%s[%d]\n",pre,i);
     }
     return 0;
 }
@@ -284,6 +229,7 @@ static int check_links(cJSON *links,int level)
             if(check_int(speedLimits_count,1,9,pre,"speedLimits count"));
             if(check_speedLimits(speedLimits,level+1) != 0)return ret;
         }
+        printf("%s[%d]\n",pre,i);
     }
     return 0;
 }
@@ -323,6 +269,7 @@ static int check_nodes(cJSON *nodes,int level)
             if(check_int(links_count,1,32,pre,"links count") !=0)return ret;
             if(check_links(links,level+1) != 0)return ret;
         }
+        printf("%s[%d]\n",pre,i);
     }
     return 0;
 }
@@ -333,7 +280,6 @@ static int check_map_json(cJSON *json)
     int ret = -1,level = 0;
     char pre[PRE_SIZE] = {0};
     char log[LOG_SIZE] = {0};
-    if(json == NULL)return ret;
 
     get_pre(pre,"map",level);
     sprintf(log,"%s : ",pre);
@@ -349,6 +295,7 @@ static int check_map_json(cJSON *json)
     if(check_int(nodes_count,1,32,pre,"nodes count") !=0)return ret;
     if(check_nodes(nodes,level+1) != 0)return ret;
 
+    printf("%s\n",pre);
     return 0;
 }
 
@@ -523,12 +470,11 @@ void encode_map(char *json_file, char *uper_file)
     if(!json)return;
 
     char *pre = "——————————";
-    char *suf = "——————————";
     // 检查 json 文件是否符合 map 数据的要求
-    printf("%s check map json start %s\n",pre,suf);
+    printf("%s check map json start %s\n",pre,pre);
     int ret = check_map_json(json);
-    if(ret == 0)printf("%s check map json \e[32;40mOK\e[0m %s\n",pre,suf);
-    else{printf("%s check map json \e[31;40mFAIL\e[0m %s\n",pre,suf);return;}
+    if(ret == 0)printf("%s check map json \e[32;40mOK\e[0m %s\n",pre,pre);
+    else{printf("%s check map json \e[31;40mFAIL\e[0m %s\n",pre,pre);return;}
 
     cJSON *nodes = cJSON_GetObjectItem(json,"nodes");
     int node_num = cJSON_GetArraySize(nodes);
@@ -568,90 +514,121 @@ void encode_map(char *json_file, char *uper_file)
 //---------------------- print map -----------------------------
 
 // 打印 lanes 中的 points
-static void print_points(PointList_t *pointlist)
+static void print_points(PointList_t *pointlist,int level)
 {
     if(!pointlist)return;
 
     int i;
     long lon,lat;
     char * type = "";
-    int point_num = pointlist->list.count;
-    printf("------points num = %d \n",point_num);
-    for(i=0;i<point_num;i++){
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"point",level);
+
+
+    int count = pointlist->list.count;
+    for(i=0;i<count;i++){
         RoadPoint_t *point = pointlist->list.array[i];
 
         switch (point->posOffset.offsetLL.present) {
             case PositionOffsetLL_PR_position_LL1:
                 lon = point->posOffset.offsetLL.choice.position_LL1.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL1.lat;
-                type = "LL1 : 24";
+                type = "LL1:24";
                 break;
             case PositionOffsetLL_PR_position_LL2:
                 lon = point->posOffset.offsetLL.choice.position_LL2.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL2.lat;
-                type = "LL2 : 28";
+                type = "LL2:28";
                 break;
             case PositionOffsetLL_PR_position_LL3:
                 lon = point->posOffset.offsetLL.choice.position_LL3.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL3.lat;
-                type = "LL3 : 32";
+                type = "LL3:32";
                 break;
             case PositionOffsetLL_PR_position_LL4:
                 lon = point->posOffset.offsetLL.choice.position_LL4.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL4.lat;
-                type = "LL4 : 36";
+                type = "LL4:36";
                 break;
             case PositionOffsetLL_PR_position_LL5:
                 lon = point->posOffset.offsetLL.choice.position_LL5.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL5.lat;
-                type = "LL5 : 44";
+                type = "LL5:44";
                 break;
             case PositionOffsetLL_PR_position_LL6:
                 lon = point->posOffset.offsetLL.choice.position_LL6.lon;
                 lat = point->posOffset.offsetLL.choice.position_LL6.lat;
-                type = "LL6 : 48";
+                type = "LL6:48";
                 break;
             case PositionOffsetLL_PR_position_LatLon:
                 lon = point->posOffset.offsetLL.choice.position_LatLon.lon;
                 lat = point->posOffset.offsetLL.choice.position_LatLon.lat;
-                type = "LL_LatLon : 64";
+                type = "LL_LatLon:64";
                 break;
         }
-        printf("--------points[%d] : [%s] lon = %ld , lat = %ld  \n",i,type,lon,lat);
+        printf("%s[%d] : lon=%ld,lat=%ld  (%s)\n",pre,i,lon,lat,type);
+    }
+}
+
+// 打印 links 中的 connectsTo
+static void print_connectsTo(ConnectsToList_t *list,int level)
+{
+    if(!list)return;
+
+    int i;
+    char pre[PRE_SIZE] = {0};
+    char log[LOG_SIZE] = {0};
+    get_pre(pre,"connectsTo",level);
+
+    int count = list->list.count;
+    for(i=0;i<count;i++){
+        sprintf(log,"%s[%d] : ",pre,i);
+        Connection_t *connect = list->list.array[i];
+        sprintf(log+strlen(log),"remoteIntersection=%ld,",connect->remoteIntersection.id);
+        if(connect->connectingLane)sprintf(log+strlen(log),"*connectingLane=%ld,",connect->connectingLane->lane);
+        if(connect->phaseId)sprintf(log+strlen(log),"*phaseId=%ld,",*connect->phaseId);
+
+        printf("%s\n",log);
     }
 }
 
 // 打印 links 中的 lanes
-static void print_lanes(LaneList_t *lanelist)
+static void print_lanes(LaneList_t *lanelist,int level)
 {
     int i;
-    int lane_num = lanelist->list.count;
-    printf("----lanes num = %d\n",lane_num);
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"lane",level);
 
-    for(i=0;i<lane_num;i++){
-        printf("------lanes[%d] : \n",i);
+    int count = lanelist->list.count;
+    for(i=0;i<count;i++){
         Lane_t *lane = lanelist->list.array[i];
-        printf("------laneID = %ld\n",lane->laneID);
-        print_points(lane->points);
+        int point_count = 0;
+        int connect_count = 0;
+        if(lane->points)point_count = lane->points->list.count;
+        if(lane->connectsTo)connect_count = lane->connectsTo->list.count;
+        printf("%s[%d] : laneID=%ld,*points[%d],*connectsTo[%d]\n",pre,i,lane->laneID,point_count,connect_count);
+
+        print_points(lane->points,level+1);
+        print_connectsTo(lane->connectsTo,level+1);
+        printf("%s[%d]\n",pre,i);
     }
 }
 
-
 // 打印 map 中的 speedLimits
-static void print_speedLimits(SpeedLimitList_t *speedlist)
+static void print_speedLimits(SpeedLimitList_t *speedlist,int level)
 {
     if(!speedlist)return;
 
     int i;
-    int speed_num = speedlist->list.count;
-    printf("----speedLimits num = %d\n",speed_num);
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"speedLimit",level);
+    int count = speedlist->list.count;
 
-    for(i=0;i<speed_num;i++){
+    for(i=0;i<count;i++){
         RegulatorySpeedLimit_t *limit = speedlist->list.array[i];
-        printf("------speedLimits[%d] : type = %ld , speed = %.2lf [%ld]\n",i,limit->type,limit->speed*SPEED_RESOLUTION,limit->speed);
+        printf("%s[%d] : type=%ld,speed=%.2lf(%ld)\n",pre,i,limit->type,limit->speed*SPEED_RESOLUTION,limit->speed);
     }
 }
-
 
 // 打印 map 中的 links
 static void print_links(LinkList_t *linklist,int level)
@@ -669,11 +646,14 @@ static void print_links(LinkList_t *linklist,int level)
         int limit_count = 0;
         if(link->speedLimits)limit_count = link->speedLimits->list.count;
         printf("%s[%d] : upstreamNodeId=%ld,laneWidth=%ld,lanes[%d],*speedLimits[%d]\n",pre,i,link->upstreamNodeId.id,link->laneWidth,lane_count,limit_count);
-        print_lanes(&link->lanes);
-        print_speedLimits(link->speedLimits);
+
+        print_lanes(&link->lanes,level+1);
+        print_speedLimits(link->speedLimits,level+1);
+        printf("%s[%d]\n",pre,i);
     }
 }
 
+// 打印 map 中的 nodes
 void print_nodes(NodeListltev_t *nodelist,int level)
 {
     int i;
@@ -685,11 +665,13 @@ void print_nodes(NodeListltev_t *nodelist,int level)
         Node_t *node = nodelist->list.array[i];
         LinkList_t *linklist = node->inLinks;
         printf("%s[%d] : id=%ld,lon=%ld,lat=%ld\n",pre,i,node->id.id,node->refPos.Long,node->refPos.lat);
+
         print_links(linklist,level+1);
+        printf("%s[%d]\n",pre,i);
     }
 }
 
-// 打印 map 数据
+// 打印 map
 void print_map(MessageFrame_t *msg)
 {
     int level = 0;
@@ -700,6 +682,7 @@ void print_map(MessageFrame_t *msg)
     printf("%s : nodes[%d]\n",pre,map.nodes.list.count);
 
     print_nodes(&map.nodes,level+1);
+    printf("%s\n",pre);
 }
 
 

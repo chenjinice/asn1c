@@ -5,6 +5,44 @@
 #include "MessageFrame.h"
 
 
+
+// 打印消息前缀
+void get_pre(char *pre,char *name,int level)
+{
+    int i;
+    char *format = "│ ";
+    char *format_last = "├ ";
+    pre[0] = 0;
+    for(i=0;i<level;i++){
+        if(i== level-1)sprintf(pre+strlen(pre),"%s",format_last);
+        else sprintf(pre+strlen(pre),"%s",format);
+    }
+    sprintf(pre+strlen(pre),"%s",name);
+}
+
+// 判断整数是否在范围内
+int check_int(int num ,int min,int max,char *pre,char *name)
+{
+    if( (num < min) || (num > max) ){
+        printf("%s.%s error : value = %d, must be (%d ~ %d)\n",pre,name,num,min,max);
+        return -1;
+    }else{
+        return 0;
+    }
+}
+
+// 判断浮点数是否在范围内
+int check_double(double num ,double min,double max,char *pre,char *name)
+{
+    if( (num < min) || (num > max) ){
+        printf("%s.%s error : value = %lf, must be (%.2lf ~ %.2lf)\n",pre,name,num,min,max);
+        return -1;
+    }else{
+        return 0;
+    }
+}
+
+
 // 获取文件大小
 int get_file_size(char *path)
 {

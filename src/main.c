@@ -26,15 +26,13 @@ int main(int argc,char *argv[])
         if(!msg)return 0;
         switch (msg->present) {
             case MessageFrame_PR_mapFrame:
-                printf("=== map ===\n");
                 print_map(msg);
                 break;
             case MessageFrame_PR_rsiFrame:
-                printf("=== rsi ===\n");
                 print_rsi(msg);
                 break;
             default:
-                printf("=== ??? === : unknow type , msg->present = %d\n",msg->present);
+                printf("=== ??? : unknow msg type , msg->present = %d ===\n",msg->present);
                 break;
         }
         ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);

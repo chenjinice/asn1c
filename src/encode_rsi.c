@@ -9,16 +9,23 @@
 // 检查 rsi 的 json 文件数据是否符合要求
 static int check_rsi_json(cJSON *json)
 {
-    int ret = -1;
+    int ret = -1,level = 0;
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"rsi",level);
+
     cJSON *lon = cJSON_GetObjectItem(json,"lon");
     cJSON *lat = cJSON_GetObjectItem(json,"lat");
     cJSON *alertType = cJSON_GetObjectItem(json,"alertType");
     if(lon == NULL){printf("error : no lon\n");return ret;}
     if(lat == NULL){printf("error : no lat\n");return ret;}
     if(alertType == NULL){printf("error : no alertType\n");return ret;}
-    printf("lon = %d \n",lon->valueint);
-    printf("lat = %d \n",lat->valueint);
-    printf("alertType = %d\n",alertType->valueint);
+    printf("%s : lon=%d,lat=%d,alertType=%d\n",pre,lon->valueint,lat->valueint,alertType->valueint);
+
+    if(check_int(lon->valueint,-LON_MAX,LON_MAX,pre,"lon") != 0)return ret;
+    if(check_int(lat->valueint,-LAT_MAX,LAT_MAX,pre,"lat") != 0)return ret;
+    if(check_int(alertType->valueint,0,U16_MAX,pre,"alertType") != 0)return ret;
+
+    printf("%s\n",pre);
     return 0;
 }
 
@@ -31,11 +38,12 @@ void encode_rsi(char *json_file, char *uper_file)
     cJSON *json = read_json(json_file);
     if(!json)return;
 
+    char *pre = "——————————";
     // 检查 json 数据是否符合要求
-    printf("———————— check rsi json start ————————\n");
+    printf("%s check rsi json start %s\n",pre,pre);
     int ret = check_rsi_json(json);
-    if(ret == 0)printf("———————— check rsi json \e[32;40mOK\e[0m ————————\n");
-    else{printf("———————— check rsi json \e[31;40mFAIL\e[0m ————————\n");return;}
+    if(ret == 0)printf("%s check rsi json \e[32;40mOK\e[0m %s\n",pre,pre);
+    else{printf("%s check rsi json \e[31;40mFAIL\e[0m %s\n",pre,pre);return;}
 
     int lon = cJSON_GetObjectItem(json,"lon")->valueint;
     int lat = cJSON_GetObjectItem(json,"lat")->valueint;
@@ -78,10 +86,14 @@ void encode_rsi(char *json_file, char *uper_file)
 // 打印 rsi 数据
 void print_rsi(MessageFrame_t *msg)
 {
+    int level = 0;
+    char pre[PRE_SIZE] = {0};
+    get_pre(pre,"rsi",level);
+
     RSI_t rsi = msg->choice.rsiFrame;
-    printf("lon = %ld \n",rsi.refPos.Long);
-    printf("lat = %ld \n",rsi.refPos.lat);
-    printf("alertType = %ld\n",rsi.alertType);
+    printf("%s : lon=%ld,lat=%ld,alertType=%ld\n",pre,rsi.refPos.Long,rsi.refPos.lat,rsi.alertType);
+
+    printf("%s\n",pre);
 }
 
 
