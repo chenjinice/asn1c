@@ -1,9 +1,9 @@
-# ltev_tool 
+# ltev_tool      
+   
 
-
-编译:
-	mkdir build
-	cd    build
-	cmake ..
-	make
+编译:            
+  mkdir build    
+  cd    build    
+  cmake ..       
+  make           
 
