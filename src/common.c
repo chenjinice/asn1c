@@ -142,6 +142,7 @@ MessageFrame_t *decode(char *path)
 
     uint8_t *buffer;
     int len = read_file(path,&buffer);
+    printf("%s : file size = %d\n",path,len);
     if(!buffer)return msg;
 
     rval = uper_decode_complete(opt_codec_ctx,&asn_DEF_MessageFrame,(void **)&msg,buffer,len);
