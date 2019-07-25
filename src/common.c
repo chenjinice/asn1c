@@ -79,12 +79,12 @@ int read_file(char *path,uint8_t **buffer)
         return ret;
     }
 
-    *buffer = (char*)malloc(filesize);
+    *buffer = (uint8_t*)malloc(filesize);
     int len = read(fd,*buffer,filesize);
     close(fd);
     if(len != filesize){
         printf("read %s error : len = %d,filesize = %d\n",path,len,filesize);
-        free(buffer);
+        free(*buffer);
         return ret;
     }
     return filesize;
