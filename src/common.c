@@ -85,6 +85,7 @@ int read_file(char *path,uint8_t **buffer)
     if(len != filesize){
         printf("read %s error : len = %d,filesize = %d\n",path,len,filesize);
         free(*buffer);
+        *buffer = NULL;
         return ret;
     }
     return filesize;
@@ -142,11 +143,12 @@ MessageFrame_t *decode(char *path)
 
     uint8_t *buffer;
     int len = read_file(path,&buffer);
+    if(len < 0)return msg;
     printf("%s : file size = %d\n",path,len);
-    if(!buffer)return msg;
 
     rval = uper_decode_complete(opt_codec_ctx,&asn_DEF_MessageFrame,(void **)&msg,buffer,len);
-    free(buffer);
+    free(buffer);buffer = NULL;
+
     if(rval.code != RC_OK){
         ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
         msg = NULL;

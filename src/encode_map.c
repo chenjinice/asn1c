@@ -153,7 +153,7 @@ static int check_lanes(cJSON *lanes,int level)
         }
         if(connectsTo_count > 0){
             // 国标 connectsTo 个数: 1 - 8 , optional ， 可以没有
-            if(check_int(points_count,2,31,pre,"connectsTo count") != 0)return ret;
+            if(check_int(connectsTo_count,1,8,pre,"connectsTo count") != 0)return ret;
             if(check_connectsTo(connectsTo,level+1) != 0)return ret;
         }
         printf("%s[%d]\n",pre,i);
@@ -257,7 +257,7 @@ static int check_nodes(cJSON *nodes,int level)
         sprintf(log+strlen(log),"id=%d,lon=%d,lat=%d,",id->valueint,lon->valueint,lat->valueint);
         if(links){
             links_count =  cJSON_GetArraySize(links);
-            sprintf(log+strlen(log),"*links[%d]",links_count);
+            sprintf(log+strlen(log),"*inLinks[%d]",links_count);
         }
         printf("%s\n",log);
 
@@ -565,6 +565,11 @@ static void print_points(PointList_t *pointlist,int level)
                 lat = point->posOffset.offsetLL.choice.position_LatLon.lat;
                 type = "LL_LatLon:64";
                 break;
+            default :
+                lon = 0;
+                lat = 0;
+                type = " ?? ";
+                break;
         }
         printf("%s[%d] : lon=%ld,lat=%ld  (%s)\n",pre,i,lon,lat,type);
     }
@@ -664,7 +669,9 @@ void print_nodes(NodeListltev_t *nodelist,int level)
     for(i=0;i<count;i++){
         Node_t *node = nodelist->list.array[i];
         LinkList_t *linklist = node->inLinks;
-        printf("%s[%d] : id=%ld,lon=%ld,lat=%ld\n",pre,i,node->id.id,node->refPos.Long,node->refPos.lat);
+        int link_count = 0;
+        if(linklist)link_count = linklist->list.count;
+        printf("%s[%d] : id=%ld,lon=%ld,lat=%ld,*inLinks[%d]\n",pre,i,node->id.id,node->refPos.Long,node->refPos.lat,link_count);
 
         print_links(linklist,level+1);
         printf("%s[%d]\n",pre,i);
