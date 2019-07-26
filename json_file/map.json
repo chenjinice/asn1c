@@ -8,30 +8,27 @@
 	"nodes":[
 		{
 			"id" : 123,
+			"// region" : 0,
 			"lon" : 1128674224,
 			"lat"  : 281137561,
 			"links" : [
 				{
 					"upstreamNodeId" : 11,
 					"laneWidth" : 350,
-					"speedLimits" : [
-						{"type":1,"speed":10},
-						{"type":2,"speed":20},
+					"// speedLimits" : [
 						{"type":3,"speed":30}
+					],
+					"// movements" : [
+						{"remoteIntersection": 12,"phaseId":4}
 					],
 					"lanes" : [
 						{
 							"laneID" : 1,
 							"pointBits" : 44,
-							"connectsTo" : [
+							"// connectsTo" : [
 								{"remoteIntersection": 1,"connectingLane":44,"phaseId":5}
 							],
 							"points" : [
-								{"lon":7000,"lat":7700} ,
-								{"lon":6000,"lat":6600} ,
-								{"lon":5000,"lat":5500} ,
-								{"lon":4000,"lat":4400} ,
-								{"lon":3000,"lat":3300} ,
 								{"lon":2000,"lat":2200} ,
 								{"lon":1000,"lat":1100} 
 							]
@@ -40,12 +37,6 @@
 							"laneID" : 2,
 							"pointBits" : 28,
 							"points" : [
-								{"lon":1900,"lat":2900} ,
-								{"lon":1800,"lat":2800} ,
-								{"lon":1700,"lat":2700} ,
-								{"lon":1600,"lat":2600} ,
-								{"lon":1500,"lat":2500} ,
-								{"lon":1400,"lat":2400} ,
 								{"lon":1300,"lat":2300} ,
 								{"lon":1200,"lat":2200} ,
 								{"lon":1100,"lat":2100} 

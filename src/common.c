@@ -1,9 +1,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <errno.h>
 #include "common.h"
 #include "MessageFrame.h"
-
 
 
 // 打印消息前缀
@@ -50,8 +50,7 @@ int get_file_size(char *path)
     struct stat statbuff;
 
     if(stat(path, &statbuff) < 0){
-        printf("%s : get file status fail\n",path);
-        perror("error ");
+        printf("%s : get file status fail , %s\n",path,strerror(errno));
         return ret;
     }
     return statbuff.st_size;

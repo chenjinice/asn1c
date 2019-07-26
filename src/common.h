@@ -8,7 +8,7 @@
 #define U8_MAX     255
 #define U16_MAX    65535
 
-#define  BUFF_SIZE 65535
+#define BUFF_SIZE 65535
 #define LOG_SIZE    300
 #define PRE_SIZE    40
 
