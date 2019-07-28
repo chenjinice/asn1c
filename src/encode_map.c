@@ -12,66 +12,35 @@
 
 //---------------------- check -----------------------------
 
-/*
- * 获取不同 pointBits 类型的不同经纬度范围
- * pointBits 类型有 ： 24,28,32,36,44,48,64 , 代表用多少位数据来保存经纬度2个值
- * 例如 24 代表 12位数据保存经度，另外12位保持纬度
- * 注意：前6种类型，代表相对于参考点的经纬度偏移值， 而 64 不同，它代表的就是经纬度值
- */
-static void get_point_max(int *lon_max,int *lat_max,int pointBits)
-{
-    int temp;
-    if(pointBits >= 64){
-        *lon_max = LON_MAX;
-        *lat_max = LAT_MAX;
-    }else{
-        temp = pow(2,pointBits/2-1) - 1;
-        *lon_max = temp;
-        *lat_max = temp;
-    }
-}
-
-static int check_pointBits(int pointBits)
-{
-    int ret = -1;
-    switch (pointBits) {
-        case 24:
-        case 28:
-        case 32:
-        case 36:
-        case 44:
-        case 48:
-        case 64:
-            ret = 0;
-            break;
-    }
-    return ret;
-}
 
 // 检查 json 数据是否符合 lanes 中的 points 要求
-static int check_points(cJSON *points,int pointBits,int level)
+static int check_points(cJSON *points,int level)
 {
     int ret = -1,i,lon_max,lat_max,lon_int,lat_int;
     char pre[PRE_SIZE] = {0};
     char log[LOG_SIZE] = {0};
+    char str[100] = {0};
     get_pre(pre,"point",level);
-
-    get_point_max(&lon_max,&lat_max,pointBits);
-    printf("%s range == lat:+-%d , lon:+-%d\n",pre,lon_max,lat_max);
 
     int count =  cJSON_GetArraySize(points);
     for(i=0;i<count;i++){
+        int point_bits = 0;
         sprintf(log,"%s[%d] : ",pre,i);
         cJSON *point = cJSON_GetArrayItem(points,i);
         cJSON *lon = cJSON_GetObjectItem(point,"lon");
         cJSON *lat = cJSON_GetObjectItem(point,"lat");
+        cJSON *bits = cJSON_GetObjectItem(point,"bits");
         if(!lon){printf("%s error : has no lon\n",pre);return ret;}
         if(!lat){printf("%s error : has no lat\n",pre);return ret;}
+        if(bits){point_bits = bits->valueint;}
         lon_int = lon->valueint;
         lat_int = lat->valueint;
-        if(check_int(lon_int,-lon_max,lon_max,pre,"lon") !=0 )return ret;
-        if(check_int(lat_int,-lat_max,lat_max,pre,"lat") !=0 )return ret;
-        sprintf(log+strlen(log),"lon=%d,lat=%d",lon_int,lat_int);
+        if(check_int(lon_int,-LON_MAX,LON_MAX,pre,"lon") !=0 )return ret;
+        if(check_int(lat_int,-LAT_MAX,LAT_MAX,pre,"lat") !=0 )return ret;
+        PositionOffsetLL_PR point_type = get_point_type(lon_int,lat_int,point_bits);
+        if(point_type == PositionOffsetLL_PR_NOTHING){printf("%s point type error : nothing\n",pre);return ret;}
+        get_type_str(point_type,str);
+        sprintf(log+strlen(log),"lon=%d,lat=%d <%s>",lon_int,lat_int,str);
         printf("%s\n",log);
     }
     return 0;
@@ -126,11 +95,9 @@ static int check_lanes(cJSON *lanes,int level)
         cJSON *lane = cJSON_GetArrayItem(lanes,i);
         cJSON *laneID = cJSON_GetObjectItem(lane,"laneID");
         cJSON *points = cJSON_GetObjectItem(lane,"points");
-        cJSON *pointBits = cJSON_GetObjectItem(lane,"pointBits");
         cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
         if(laneID == NULL){printf("%s error : has no laneID\n",pre);return ret;}
-        if(pointBits == NULL){printf("%s error : has no pointBits\n",pre);return ret;}
-        sprintf(log+strlen(log),"laneID=%d,pointBits=%d,",laneID->valueint,pointBits->valueint);
+        sprintf(log+strlen(log),"laneID=%d,",laneID->valueint);
         if(points){
             points_count = cJSON_GetArraySize(points);
             sprintf(log+strlen(log),"*points[%d],",points_count);
@@ -142,10 +109,6 @@ static int check_lanes(cJSON *lanes,int level)
         printf("%s\n",log);
 
         if(check_int(laneID->valueint,LANEID_MIN,LANEID_MAX,pre,"laneID") != 0)return ret;
-        if( check_pointBits(pointBits->valueint) != 0){
-            printf("%s pointBits invalid : value = [%d]. must be [24,28,32,36,44,48,64]\n",pre,pointBits->valueint);
-            return ret;
-        }
         if(connectsTo_count > 0){
             // 国标 connectsTo 个数: 1 - 8 , optional ， 可以没有
             if(check_int(connectsTo_count,1,8,pre,"connectsTo count") != 0)return ret;
@@ -154,7 +117,7 @@ static int check_lanes(cJSON *lanes,int level)
         if(points_count > 0){
             // 国标 points 个数: 2 - 31 , optional ， 可以没有
             if(check_int(points_count,2,31,pre,"points count") != 0)return ret;
-            if(check_points(points,pointBits->valueint,level+1) != 0)return ret;
+            if(check_points(points,level+1) != 0)return ret;
         }
         printf("%s[%d]\n",pre,i);
     }
@@ -348,56 +311,23 @@ static int check_map_json(cJSON *json)
 //---------------------- add -----------------------------
 
 // 给 lane 添加 points
-static void add_points(PointList_t *pointlist,cJSON *points,int pointBits)
+static void add_points(PointList_t *pointlist,cJSON *points)
 {
     int i;
     int point_num =  cJSON_GetArraySize(points);
     for(i=0;i<point_num;i++){
+        int point_bits = 0;
         cJSON *point = cJSON_GetArrayItem(points,i);
         RoadPoint_t *road_point = calloc(1,sizeof(RoadPoint_t));
         long lon = cJSON_GetObjectItem(point,"lon")->valueint;
         long lat = cJSON_GetObjectItem(point,"lat")->valueint;
+        cJSON *bits = cJSON_GetObjectItem(point,"bits");
+        if(bits)point_bits = bits->valueint;
+        PositionOffsetLL_PR point_type = get_point_type((int)lon,(int)lat,point_bits);
         road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LatLon;
         road_point->posOffset.offsetLL.choice.position_LatLon.lon = lon;
         road_point->posOffset.offsetLL.choice.position_LatLon.lat = lat;
-
-        switch (pointBits) {
-            case 24:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LL1;
-                road_point->posOffset.offsetLL.choice.position_LL1.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LL1.lat = lat;
-                break;
-            case 28:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LL2;
-                road_point->posOffset.offsetLL.choice.position_LL2.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LL2.lat = lat;
-                break;
-            case 32:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LL3;
-                road_point->posOffset.offsetLL.choice.position_LL3.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LL3.lat = lat;
-                break;
-            case 36:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LL4;
-                road_point->posOffset.offsetLL.choice.position_LL4.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LL4.lat = lat;
-                break;
-            case 44:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LL5;
-                road_point->posOffset.offsetLL.choice.position_LL5.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LL5.lat = lat;
-                break;
-            case 48:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LL6;
-                road_point->posOffset.offsetLL.choice.position_LL6.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LL6.lat = lat;
-                break;
-            case 64:
-                road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LatLon;
-                road_point->posOffset.offsetLL.choice.position_LatLon.lon = lon;
-                road_point->posOffset.offsetLL.choice.position_LatLon.lat = lat;
-                break;
-        }
+        set_roadpoint(road_point,lon,lat,point_type);
 
         ASN_SET_ADD(&pointlist->list,road_point);
     }
@@ -439,14 +369,13 @@ static void add_lanes(LaneList_t *lanelist, cJSON *lanes)
         cJSON *lane = cJSON_GetArrayItem(lanes,i);
         Lane_t *map_lane = calloc(1,sizeof(Lane_t));
         long id = cJSON_GetObjectItem(lane,"laneID")->valueint;
-        int pointBits = cJSON_GetObjectItem(lane,"pointBits")->valueint;
         cJSON *points = cJSON_GetObjectItem(lane,"points");
         cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
         map_lane->laneID = id;
         if( points && (cJSON_GetArraySize(points) > 1) ){
             PointList_t *pointlist = calloc(1,sizeof(PointList_t));
             map_lane->points = pointlist;
-            add_points(pointlist,points,pointBits);
+            add_points(pointlist,points);
         }
         if( connectsTo && (cJSON_GetArraySize(connectsTo) > 0 ) ){
             ConnectsToList_t *connectlist = calloc(1,sizeof(ConnectsToList_t));
@@ -598,56 +527,16 @@ static void print_points(PointList_t *pointlist,int level)
     long lon,lat;
     char * type = "";
     char pre[PRE_SIZE] = {0};
+    char str[100] = {0};
     get_pre(pre,"point",level);
-
 
     int count = pointlist->list.count;
     for(i=0;i<count;i++){
         RoadPoint_t *point = pointlist->list.array[i];
+        get_roadpoint(point,&lon,&lat);
+        get_type_str(point->posOffset.offsetLL.present,str);
 
-        switch (point->posOffset.offsetLL.present) {
-            case PositionOffsetLL_PR_position_LL1:
-                lon = point->posOffset.offsetLL.choice.position_LL1.lon;
-                lat = point->posOffset.offsetLL.choice.position_LL1.lat;
-                type = "LL1:24";
-                break;
-            case PositionOffsetLL_PR_position_LL2:
-                lon = point->posOffset.offsetLL.choice.position_LL2.lon;
-                lat = point->posOffset.offsetLL.choice.position_LL2.lat;
-                type = "LL2:28";
-                break;
-            case PositionOffsetLL_PR_position_LL3:
-                lon = point->posOffset.offsetLL.choice.position_LL3.lon;
-                lat = point->posOffset.offsetLL.choice.position_LL3.lat;
-                type = "LL3:32";
-                break;
-            case PositionOffsetLL_PR_position_LL4:
-                lon = point->posOffset.offsetLL.choice.position_LL4.lon;
-                lat = point->posOffset.offsetLL.choice.position_LL4.lat;
-                type = "LL4:36";
-                break;
-            case PositionOffsetLL_PR_position_LL5:
-                lon = point->posOffset.offsetLL.choice.position_LL5.lon;
-                lat = point->posOffset.offsetLL.choice.position_LL5.lat;
-                type = "LL5:44";
-                break;
-            case PositionOffsetLL_PR_position_LL6:
-                lon = point->posOffset.offsetLL.choice.position_LL6.lon;
-                lat = point->posOffset.offsetLL.choice.position_LL6.lat;
-                type = "LL6:48";
-                break;
-            case PositionOffsetLL_PR_position_LatLon:
-                lon = point->posOffset.offsetLL.choice.position_LatLon.lon;
-                lat = point->posOffset.offsetLL.choice.position_LatLon.lat;
-                type = "LL_LatLon:64";
-                break;
-            default :
-                lon = 0;
-                lat = 0;
-                type = " ?? ";
-                break;
-        }
-        printf("%s[%d] : lon=%ld,lat=%ld  (%s)\n",pre,i,lon,lat,type);
+        printf("%s[%d] : lon=%ld,lat=%ld  <%s>\n",pre,i,lon,lat,str);
     }
 }
 

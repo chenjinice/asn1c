@@ -36,6 +36,7 @@ void get_pre(char *pre,char *name,int level);
 int check_int(int num ,int min,int max,char *pre,char *name);
 int check_double(double num ,double min,double max,char *pre,char *name);
 
+// encode & decode
 int get_file_size(char *path);
 int read_file(char *path,uint8_t **buffer);
 void write_file(char *path, uint8_t *buffer, int length);
@@ -43,8 +44,11 @@ cJSON *read_json(char *path);
 void encode(char *path, MessageFrame_t *msg);
 MessageFrame_t *decode(char *path);
 
-
-
+// roadPoint
+PositionOffsetLL_PR get_point_type(int lon, int lat, int bits);
+void get_type_str(PositionOffsetLL_PR type,char *str);
+void set_roadpoint(RoadPoint_t *point ,long lon,long lat,PositionOffsetLL_PR type);
+void get_roadpoint(RoadPoint_t *point ,long *lon,long *lat);
 
 #endif
 
