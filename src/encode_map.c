@@ -40,7 +40,7 @@ static int check_points(cJSON *points,int level)
         PositionOffsetLL_PR point_type = get_point_type(lon_int,lat_int,point_bits);
         if(point_type == PositionOffsetLL_PR_NOTHING){printf("%s point type error : nothing\n",pre);return ret;}
         get_type_str(point_type,str);
-        sprintf(log+strlen(log),"lon=%d,lat=%d <%s>",lon_int,lat_int,str);
+        sprintf(log+strlen(log),"lon=%d,lat=%d   (%s)",lon_int,lat_int,str);
         printf("%s\n",log);
     }
     return 0;
@@ -536,7 +536,7 @@ static void print_points(PointList_t *pointlist,int level)
         get_roadpoint(point,&lon,&lat);
         get_type_str(point->posOffset.offsetLL.present,str);
 
-        printf("%s[%d] : lon=%ld,lat=%ld  <%s>\n",pre,i,lon,lat,str);
+        printf("%s[%d] : lon=%ld,lat=%ld   (%s)\n",pre,i,lon,lat,str);
     }
 }
 
@@ -634,9 +634,11 @@ static void print_links(LinkList_t *linklist,int level)
     for(i=0;i<count;i++){
         Link_t *link = linklist->list.array[i];
         int lane_count = link->lanes.list.count;
-        int limit_count = 0;
+        int limit_count = 0,movement_count = 0;
         if(link->speedLimits)limit_count = link->speedLimits->list.count;
-        printf("%s[%d] : upstreamNodeId=%ld,laneWidth=%ld,lanes[%d],*speedLimits[%d]\n",pre,i,link->upstreamNodeId.id,link->laneWidth,lane_count,limit_count);
+        if(link->movements)movement_count = link->movements->list.count;
+        printf("%s[%d] : upstreamNodeId=%ld,laneWidth=%ld,lanes[%d],*speedLimits[%d],*movements[%d]\n",
+               pre,i,link->upstreamNodeId.id,link->laneWidth,lane_count,limit_count,movement_count);
 
         print_speedLimits(link->speedLimits,level+1);
         print_movements(link->movements,level+1);

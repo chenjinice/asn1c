@@ -211,10 +211,10 @@ PositionOffsetLL_PR get_point_type(int lon, int lat, int bits)
 
 void get_type_str(PositionOffsetLL_PR type, char *str)
 {
-    if( (type >= PositionOffsetLL_PR_NOTHING) && (type <= PositionOffsetLL_PR_position_LatLon) ) {
-        sprintf(str,"LL%d:%d:lon:%d,lat:%d",type,s_bits[type-1],s_lon_max[type-1],s_lat_max[type-1]);
+    if( (type > PositionOffsetLL_PR_NOTHING) && (type < PositionOffsetLL_PR_position_LatLon) ) {
+        sprintf(str,"LL%d:%d:%d",type,s_bits[type-1],s_lon_max[type-1]);
     }else if(type == PositionOffsetLL_PR_position_LatLon){
-        sprintf(str,"LatLon:%d:lon:%d,lat:%d",s_bits[type-1],s_lon_max[type-1],s_lat_max[type-1]);
+        sprintf(str,"LatLon:64:lon:180*1e7,lat:90*1e7");
     }else{
         sprintf(str,"????");
     }
