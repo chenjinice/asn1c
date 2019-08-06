@@ -30,6 +30,8 @@
 #define SPEED_MIN  0.0
 #define SPEED_RESOLUTION  0.02
 
+#define DEFAULT_UPSTREAMID 0
+#define DEFAULT_LANEWIDTH  350
 
 
 void get_pre(char *pre,char *name,int level);

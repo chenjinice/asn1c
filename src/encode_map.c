@@ -90,12 +90,12 @@ static int check_lanes(cJSON *lanes,int level)
     int count =  cJSON_GetArraySize(lanes);
     for(i=0;i<count;i++){
         sprintf(log,"%s[%d] : ",pre,i);
-        int points_count = 0;
-        int connectsTo_count = 0;
+        int points_count = 0 , connectsTo_count = 0 , maneuvers_int = 0 ;
         cJSON *lane = cJSON_GetArrayItem(lanes,i);
         cJSON *laneID = cJSON_GetObjectItem(lane,"laneID");
         cJSON *points = cJSON_GetObjectItem(lane,"points");
         cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
+        cJSON *maneuvers = cJSON_GetObjectItem(lane,"maneuvers");
         if(laneID == NULL){printf("%s error : has no laneID\n",pre);return ret;}
         sprintf(log+strlen(log),"laneID=%d,",laneID->valueint);
         if(points){
@@ -105,6 +105,10 @@ static int check_lanes(cJSON *lanes,int level)
         if(connectsTo){
             connectsTo_count = cJSON_GetArraySize(connectsTo);
             sprintf(log+strlen(log),"*connectsTo[%d],",connectsTo_count);
+        }
+        if(maneuvers){
+            maneuvers_int = maneuvers->valueint;
+            sprintf(log+strlen(log),"*maneuvers=%d,",maneuvers_int);
         }
         printf("%s\n",log);
 
@@ -118,6 +122,9 @@ static int check_lanes(cJSON *lanes,int level)
             // 国标 points 个数: 2 - 31 , optional ， 可以没有
             if(check_int(points_count,2,31,pre,"points count") != 0)return ret;
             if(check_points(points,level+1) != 0)return ret;
+        }
+        if(maneuvers){
+            if(check_int(maneuvers_int,0,255,pre,"maneuvers") != 0)return ret;
         }
         printf("%s[%d]\n",pre,i);
     }
@@ -193,18 +200,21 @@ static int check_links(cJSON *links,int level)
     int count =  cJSON_GetArraySize(links);
     for(i=0;i<count;i++){
         sprintf(log,"%s[%d] : ",pre,i);
-        int lanes_count = 0 , speedLimits_count = 0 , movements_count = 0;
+        int lanes_count = 0 , speedLimits_count = 0 , movements_count = 0 ;
+        int node_id = DEFAULT_UPSTREAMID,width = DEFAULT_LANEWIDTH;
         cJSON *link = cJSON_GetArrayItem(links,i);
         cJSON *upstreamNodeId = cJSON_GetObjectItem(link,"upstreamNodeId");
         cJSON *laneWidth = cJSON_GetObjectItem(link,"laneWidth");
         cJSON *lanes = cJSON_GetObjectItem(link,"lanes");
         cJSON *speedLimits = cJSON_GetObjectItem(link,"speedLimits");
         cJSON *movements = cJSON_GetObjectItem(link,"movements");
-        if(upstreamNodeId == NULL){printf("%s error : has no upstreamNodeId\n",pre);return ret;}
-        if(laneWidth == NULL){printf("%s error : has no laneWidth\n",pre);return ret;}
+//        if(upstreamNodeId == NULL){printf("%s error : has no upstreamNodeId\n",pre);return ret;}
+//        if(laneWidth == NULL){printf("%s error : has no laneWidth\n",pre);return ret;}
+        if(upstreamNodeId)node_id = upstreamNodeId->valueint;
+        if(laneWidth)width = laneWidth->valueint;
         if(lanes == NULL){printf("%s error : has no lanes\n",pre);return ret;}
         lanes_count = cJSON_GetArraySize(lanes);
-        sprintf(log+strlen(log),"upstreamNodeId=%d,laneWidth=%d,lanes[%d],",upstreamNodeId->valueint,laneWidth->valueint,lanes_count);
+        sprintf(log+strlen(log),"upstreamNodeId=%d,laneWidth=%d,lanes[%d],",node_id,width,lanes_count);
         if(speedLimits){
             speedLimits_count = cJSON_GetArraySize(speedLimits);
             sprintf(log+strlen(log),"*speedLimits[%d],",speedLimits_count);
@@ -215,8 +225,12 @@ static int check_links(cJSON *links,int level)
         }
         printf("%s\n",log);
 
-        if(check_int(upstreamNodeId->valueint,NODEID_MIN,NODEID_MAX,pre,"upstreamNodeId") !=0)return ret;
-        if(check_int(laneWidth->valueint,0,LANEWIDTH_MAX,pre,"laneWidth") !=0)return ret;
+        if(upstreamNodeId){
+            if(check_int(upstreamNodeId->valueint,NODEID_MIN,NODEID_MAX,pre,"upstreamNodeId") !=0)return ret;
+        }
+        if(laneWidth){
+            if(check_int(laneWidth->valueint,0,LANEWIDTH_MAX,pre,"laneWidth") !=0)return ret;
+        }
         if(speedLimits_count > 0){
             // 国标 speedLimits 个数: 1 - 9 , optional ， 可以没有
             if(check_int(speedLimits_count,1,9,pre,"speedLimits count") != 0)return ret;
@@ -371,6 +385,7 @@ static void add_lanes(LaneList_t *lanelist, cJSON *lanes)
         long id = cJSON_GetObjectItem(lane,"laneID")->valueint;
         cJSON *points = cJSON_GetObjectItem(lane,"points");
         cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
+        cJSON *maneuvers = cJSON_GetObjectItem(lane,"maneuvers");
         map_lane->laneID = id;
         if( points && (cJSON_GetArraySize(points) > 1) ){
             PointList_t *pointlist = calloc(1,sizeof(PointList_t));
@@ -381,6 +396,16 @@ static void add_lanes(LaneList_t *lanelist, cJSON *lanes)
             ConnectsToList_t *connectlist = calloc(1,sizeof(ConnectsToList_t));
             map_lane->connectsTo = connectlist;
             add_connectsTo(connectlist,connectsTo);
+        }
+        if(maneuvers){
+            int maneuvers_int = maneuvers->valueint;
+            int b_size = 2;
+            AllowedManeuvers_t * lane_maneuvers = calloc(1,sizeof(AllowedManeuvers_t));
+            lane_maneuvers->buf = calloc(b_size,sizeof(uint8_t));
+            lane_maneuvers->size = b_size;
+            lane_maneuvers->bits_unused = 4;
+            memcpy(lane_maneuvers->buf,&maneuvers_int,b_size);
+            map_lane->maneuvers = lane_maneuvers;
         }
 
         ASN_SET_ADD(&lanelist->list,map_lane);
@@ -436,15 +461,18 @@ static void add_links(LinkList_t *linklist,cJSON *links)
     int count =  cJSON_GetArraySize(links);
 
     for(i=0;i<count;i++){
+        int node_id = DEFAULT_UPSTREAMID,width = DEFAULT_LANEWIDTH;
         cJSON *link = cJSON_GetArrayItem(links,i);
         Link_t *map_link = calloc(1,sizeof(Link_t));
-        long upstreamNodeId = cJSON_GetObjectItem(link,"upstreamNodeId")->valueint;
-        long laneWidth = cJSON_GetObjectItem(link,"laneWidth")->valueint;
+        cJSON *upstreamNodeId = cJSON_GetObjectItem(link,"upstreamNodeId");
+        cJSON *laneWidth = cJSON_GetObjectItem(link,"laneWidth");
         cJSON *lanes = cJSON_GetObjectItem(link,"lanes");
         cJSON *speedlimits = cJSON_GetObjectItem(link,"speedLimits");
         cJSON *movements = cJSON_GetObjectItem(link,"movements");
-        map_link->upstreamNodeId.id = upstreamNodeId;
-        map_link->laneWidth = laneWidth;
+        if(upstreamNodeId)node_id = upstreamNodeId->valueint;
+        if(laneWidth)width = laneWidth->valueint;
+        map_link->upstreamNodeId.id = node_id;
+        map_link->laneWidth = width;
         add_lanes(&map_link->lanes,lanes);
         if( speedlimits && (cJSON_GetArraySize(speedlimits) > 0) ){
             SpeedLimitList_t *speedlist = calloc(1,sizeof(SpeedLimitList_t));
@@ -572,11 +600,12 @@ static void print_lanes(LaneList_t *lanelist,int level)
     int count = lanelist->list.count;
     for(i=0;i<count;i++){
         Lane_t *lane = lanelist->list.array[i];
-        int point_count = 0;
-        int connect_count = 0;
+        int point_count = 0,connect_count = 0, maneuvers_int = 0;
         if(lane->points)point_count = lane->points->list.count;
         if(lane->connectsTo)connect_count = lane->connectsTo->list.count;
-        printf("%s[%d] : laneID=%ld,*points[%d],*connectsTo[%d]\n",pre,i,lane->laneID,point_count,connect_count);
+        if(lane->maneuvers)memcpy(&maneuvers_int,lane->maneuvers->buf,lane->maneuvers->size);
+        printf("%s[%d] : laneID=%ld,*points[%d],*connectsTo[%d],*maneuvers=%d\n",
+               pre,i,lane->laneID,point_count,connect_count,maneuvers_int);
 
         print_connectsTo(lane->connectsTo,level+1);
         print_points(lane->points,level+1);
