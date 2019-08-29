@@ -16,7 +16,7 @@
 // 检查 json 数据是否符合 lanes 中的 points 要求
 static int check_points(cJSON *points,int level)
 {
-    int ret = -1,i,lon_max,lat_max,lon_int,lat_int;
+    int ret = -1,i,lng_max,lat_max,lng_int,lat_int;
     char pre[PRE_SIZE] = {0};
     char log[LOG_SIZE] = {0};
     char str[100] = {0};
@@ -27,20 +27,20 @@ static int check_points(cJSON *points,int level)
         int point_bits = 0;
         sprintf(log,"%s[%d] : ",pre,i);
         cJSON *point = cJSON_GetArrayItem(points,i);
-        cJSON *lon = cJSON_GetObjectItem(point,"lon");
+        cJSON *lng = cJSON_GetObjectItem(point,"lng");
         cJSON *lat = cJSON_GetObjectItem(point,"lat");
         cJSON *bits = cJSON_GetObjectItem(point,"bits");
-        if(!lon){printf("%s error : has no lon\n",pre);return ret;}
+        if(!lng){printf("%s error : has no lng\n",pre);return ret;}
         if(!lat){printf("%s error : has no lat\n",pre);return ret;}
         if(bits){point_bits = bits->valueint;}
-        lon_int = lon->valueint;
+        lng_int = lng->valueint;
         lat_int = lat->valueint;
-        if(check_int(lon_int,-LON_MAX,LON_MAX,pre,"lon") !=0 )return ret;
+        if(check_int(lng_int,-LNG_MAX,LNG_MAX,pre,"lng") !=0 )return ret;
         if(check_int(lat_int,-LAT_MAX,LAT_MAX,pre,"lat") !=0 )return ret;
-        PositionOffsetLL_PR point_type = get_point_type(lon_int,lat_int,point_bits);
+        PositionOffsetLL_PR point_type = get_point_type(lng_int,lat_int,point_bits);
         if(point_type == PositionOffsetLL_PR_NOTHING){printf("%s point type error : nothing\n",pre);return ret;}
         get_type_str(point_type,str);
-        sprintf(log+strlen(log),"lon=%d,lat=%d   (%s)",lon_int,lat_int,str);
+        sprintf(log+strlen(log),"lng=%d,lat=%d   (%s)",lng_int,lat_int,str);
         printf("%s\n",log);
     }
     return 0;
@@ -264,17 +264,17 @@ static int check_nodes(cJSON *nodes,int level)
         cJSON *node = cJSON_GetArrayItem(nodes,i);
         cJSON *id = cJSON_GetObjectItem(node,"id");
         cJSON *region = cJSON_GetObjectItem(node,"region");
-        cJSON *lon = cJSON_GetObjectItem(node,"lon");
+        cJSON *lng = cJSON_GetObjectItem(node,"lng");
         cJSON *lat = cJSON_GetObjectItem(node,"lat");
         cJSON *links = cJSON_GetObjectItem(node,"links");
         if(id == NULL){printf("%s error : has no id\n",pre);return ret;}
-        if(lon == NULL){printf("%s error : has no lon\n",pre);return ret;}
+        if(lng == NULL){printf("%s error : has no lng\n",pre);return ret;}
         if(lat == NULL){printf("%s error : has no lat\n",pre);return ret;}
         if(region){
             region_int = region->valueint;
             if(check_int(region_int,0,U16_MAX,pre,"region") != 0)return ret;
         }
-        sprintf(log+strlen(log),"id=%d,*region=%d,lon=%d,lat=%d,",id->valueint,region_int,lon->valueint,lat->valueint);
+        sprintf(log+strlen(log),"id=%d,*region=%d,lng=%d,lat=%d,",id->valueint,region_int,lng->valueint,lat->valueint);
         if(links){
             links_count =  cJSON_GetArraySize(links);
             sprintf(log+strlen(log),"*inLinks[%d]",links_count);
@@ -283,7 +283,7 @@ static int check_nodes(cJSON *nodes,int level)
         printf("%s\n",log);
 
         if(check_int(id->valueint,NODEID_MIN,NODEID_MAX,pre,"id") != 0)return ret;
-        if(check_int(lon->valueint,-LON_MAX,LON_MAX,pre,"lon") != 0)return ret;
+        if(check_int(lng->valueint,-LNG_MAX,LNG_MAX,pre,"lng") != 0)return ret;
         if(check_int(lat->valueint,-LAT_MAX,LAT_MAX,pre,"lat") != 0)return ret;
         if(links_count > 0){
             // 国标 links 个数: 1 - 32 , optional ， 可以没有
@@ -333,15 +333,15 @@ static void add_points(PointList_t *pointlist,cJSON *points)
         int point_bits = 0;
         cJSON *point = cJSON_GetArrayItem(points,i);
         RoadPoint_t *road_point = calloc(1,sizeof(RoadPoint_t));
-        long lon = cJSON_GetObjectItem(point,"lon")->valueint;
+        long lng = cJSON_GetObjectItem(point,"lng")->valueint;
         long lat = cJSON_GetObjectItem(point,"lat")->valueint;
         cJSON *bits = cJSON_GetObjectItem(point,"bits");
         if(bits)point_bits = bits->valueint;
-        PositionOffsetLL_PR point_type = get_point_type((int)lon,(int)lat,point_bits);
+        PositionOffsetLL_PR point_type = get_point_type((int)lng,(int)lat,point_bits);
         road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LatLon;
-        road_point->posOffset.offsetLL.choice.position_LatLon.lon = lon;
+        road_point->posOffset.offsetLL.choice.position_LatLon.lon = lng;
         road_point->posOffset.offsetLL.choice.position_LatLon.lat = lat;
-        set_roadpoint(road_point,lon,lat,point_type);
+        set_roadpoint(road_point,lng,lat,point_type);
 
         ASN_SET_ADD(&pointlist->list,road_point);
     }
@@ -518,12 +518,12 @@ void encode_map(char *json_file, char *uper_file)
         cJSON *region = cJSON_GetObjectItem(node,"region");
         long region_int = 0;
         long id = cJSON_GetObjectItem(node,"id")->valueint;
-        long lon = cJSON_GetObjectItem(node,"lon")->valueint;
+        long lng = cJSON_GetObjectItem(node,"lng")->valueint;
         long lat = cJSON_GetObjectItem(node,"lat")->valueint;
         cJSON *links = cJSON_GetObjectItem(node,"links");
         if(region)region_int = region->valueint;
         map_node->id.id = id;
-        map_node->refPos.Long = lon;
+        map_node->refPos.Long = lng;
         map_node->refPos.lat = lat;
         map_node->id.region = calloc(1,sizeof(RoadRegulatorID_t));
         *map_node->id.region = region_int;
@@ -552,7 +552,7 @@ static void print_points(PointList_t *pointlist,int level)
     if(!pointlist)return;
 
     int i;
-    long lon,lat;
+    long lng,lat;
     char * type = "";
     char pre[PRE_SIZE] = {0};
     char str[100] = {0};
@@ -561,10 +561,10 @@ static void print_points(PointList_t *pointlist,int level)
     int count = pointlist->list.count;
     for(i=0;i<count;i++){
         RoadPoint_t *point = pointlist->list.array[i];
-        get_roadpoint(point,&lon,&lat);
+        get_roadpoint(point,&lng,&lat);
         get_type_str(point->posOffset.offsetLL.present,str);
 
-        printf("%s[%d] : lon=%ld,lat=%ld   (%s)\n",pre,i,lon,lat,str);
+        printf("%s[%d] : lng=%ld,lat=%ld   (%s)\n",pre,i,lng,lat,str);
     }
 }
 
@@ -691,7 +691,7 @@ void print_nodes(NodeListltev_t *nodelist,int level)
         int link_count = 0,region = 0;
         if(linklist)link_count = linklist->list.count;
         if(node->id.region)region = *node->id.region;
-        printf("%s[%d] : id=%ld,*region=%d,lon=%ld,lat=%ld,*inLinks[%d]\n",pre,i,node->id.id,region,node->refPos.Long,node->refPos.lat,link_count);
+        printf("%s[%d] : id=%ld,*region=%d,lng=%ld,lat=%ld,*inLinks[%d]\n",pre,i,node->id.id,region,node->refPos.Long,node->refPos.lat,link_count);
 
         print_links(linklist,level+1);
         printf("%s[%d]\n",pre,i);

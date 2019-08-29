@@ -1,44 +1,40 @@
 {
 	"1" : "upstreamNodeId(国标必须有，为简化json，可不写，程序默认0)",
 	"2" : "laneWidth : 0~32767 , 单位 cm (国标必须有，为简化json，可不写，程序默认350)",
-	"3" :"speedLimits,1-9个元素,每个元素中 : type 为 0-12,  speed 为 0～163.82 ，单位为 m/s ", 
-	"4" :"points中的bits指多少位保存经纬度值,可填64(绝对的经纬度值)，或不填(相对参考点的偏移值，程序自动分配位数)",
+	"3" : "speedLimits,1-9个元素,每个元素中 : type 为 0-12,  speed 为 0～163.82 ，单位为 m/s ", 
+	"4" : "points中的bits指多少位保存经纬度值,可填64(绝对的经纬度值)，或不填(相对参考点的偏移值，程序自动分配位数)",
 	"5" : "maneuvers有12位，某些位意义： 0-可直行，1-可左转，2-可右转，3-可u型转弯",
 
-	"关于地图" :"某条路的地图",
+	"关于地图" : "某条路的地图",
 
 	"nodes":[
 		{
 			"id" : 123,
 			"// region" : 0,
-			"lon" : 1128674224,
+			"lng" : 1128674224,
 			"lat"  : 281137561,
 			"links" : [
 				{
 					"// upstreamNodeId" : 11,
 					"// laneWidth" : 350,
-					"// speedLimits" : [
-						{"type":3,"speed":30}
-					],
-					"// movements" : [
-						{"remoteIntersection": 12,"phaseId":4}
-					],
+					"// speedLimits" : [ {"type":3,"speed":30} ],
+					"// movements" : [ {"remoteIntersection": 12,"phaseId":4} ],
 					"lanes" : [
 						{
 							"laneID" : 1,
 							"// connectsTo" : [ {"remoteIntersection": 1,"connectingLane":44,"phaseId":5} ],
 							"// maneuvers" : 3,
 							"points" : [
-								{"lon":2000,"lat":-2200,"// bits":64} ,
-								{"lon":1000,"lat":1100} 
+								{"lng":2000,"lat":-2200,"// bits":64} ,
+								{"lng":1000,"lat":1100} 
 							]
 						},
 						{
 							"laneID" : 2,
 							"points" : [
-								{"lon":11300,"lat":-2300} ,
-								{"lon":1200,"lat":2200} ,
-								{"lon":1100,"lat":2100} 
+								{"lng":11300,"lat":-2300} ,
+								{"lng":1200,"lat":2200} ,
+								{"lng":1100,"lat":2100} 
 							]
 						}
 					]

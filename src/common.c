@@ -7,7 +7,7 @@
 
 #define POINTTYPE_COUNT 7
 static int s_bits[POINTTYPE_COUNT] = {24,28,32,36,44,48,64};
-static int s_lon_max[POINTTYPE_COUNT] = {2047,8191,32767,131071,2097151,8388607,LON_MAX};
+static int s_lng_max[POINTTYPE_COUNT] = {2047,8191,32767,131071,2097151,8388607,LNG_MAX};
 static int s_lat_max[POINTTYPE_COUNT] = {2047,8191,32767,131071,2097151,8388607,LAT_MAX};
 
 
@@ -186,23 +186,23 @@ void encode(char *path, MessageFrame_t *msg)
 
 
 // -------------- roadpoint------------------------------------
-PositionOffsetLL_PR get_point_type(int lon, int lat, int bits)
+PositionOffsetLL_PR get_point_type(int lng, int lat, int bits)
 {
     PositionOffsetLL_PR ret = PositionOffsetLL_PR_NOTHING;
-    int lon_abs = abs(lon),lat_abs = abs(lat),i;
-    int lon_indx = -1,lat_index = -1,index = -1;
+    int lng_abs = abs(lng),lat_abs = abs(lat),i;
+    int lng_indx = -1,lat_index = -1,index = -1;
 
-    if(lon_abs > LON_MAX )return ret;
+    if(lng_abs > LNG_MAX )return ret;
     if(lat_abs > LAT_MAX)return ret;
 
     if(bits != 64){
         for(i=0;i<POINTTYPE_COUNT;i++){
-            if(lon_abs <= s_lon_max[i]){lon_indx = i;break;}
+            if(lng_abs <= s_lng_max[i]){lng_indx = i;break;}
         }
         for(i=0;i<POINTTYPE_COUNT;i++){
             if(lat_abs <= s_lat_max[i]){lat_index = i;break;}
         }
-        index = lon_indx > lat_index ? lon_indx : lat_index;
+        index = lng_indx > lat_index ? lng_indx : lat_index;
     }else{
         index = POINTTYPE_COUNT-1;
     }
@@ -212,82 +212,82 @@ PositionOffsetLL_PR get_point_type(int lon, int lat, int bits)
 void get_type_str(PositionOffsetLL_PR type, char *str)
 {
     if( (type > PositionOffsetLL_PR_NOTHING) && (type < PositionOffsetLL_PR_position_LatLon) ) {
-        sprintf(str,"LL%d:%d:%d",type,s_bits[type-1],s_lon_max[type-1]);
+        sprintf(str,"LL%d:%d:%d",type,s_bits[type-1],s_lng_max[type-1]);
     }else if(type == PositionOffsetLL_PR_position_LatLon){
-        sprintf(str,"LatLon:64:lon:180*1e7,lat:90*1e7");
+        sprintf(str,"LatLon:64:lng:180*1e7,lat:90*1e7");
     }else{
         sprintf(str,"????");
     }
 }
 
-void set_roadpoint(RoadPoint_t *point, long lon, long lat, PositionOffsetLL_PR type)
+void set_roadpoint(RoadPoint_t *point, long lng, long lat, PositionOffsetLL_PR type)
 {
     point->posOffset.offsetLL.present = type;
     switch (type) {
         case PositionOffsetLL_PR_position_LL1:
-            point->posOffset.offsetLL.choice.position_LL1.lon = lon;
+            point->posOffset.offsetLL.choice.position_LL1.lon = lng;
             point->posOffset.offsetLL.choice.position_LL1.lat = lat;
             break;
         case PositionOffsetLL_PR_position_LL2:
-            point->posOffset.offsetLL.choice.position_LL2.lon = lon;
+            point->posOffset.offsetLL.choice.position_LL2.lon = lng;
             point->posOffset.offsetLL.choice.position_LL2.lat = lat;
             break;
         case PositionOffsetLL_PR_position_LL3:
-            point->posOffset.offsetLL.choice.position_LL3.lon = lon;
+            point->posOffset.offsetLL.choice.position_LL3.lon = lng;
             point->posOffset.offsetLL.choice.position_LL3.lat = lat;
             break;
         case PositionOffsetLL_PR_position_LL4:
-            point->posOffset.offsetLL.choice.position_LL4.lon = lon;
+            point->posOffset.offsetLL.choice.position_LL4.lon = lng;
             point->posOffset.offsetLL.choice.position_LL4.lat = lat;
             break;
         case PositionOffsetLL_PR_position_LL5:
-            point->posOffset.offsetLL.choice.position_LL5.lon = lon;
+            point->posOffset.offsetLL.choice.position_LL5.lon = lng;
             point->posOffset.offsetLL.choice.position_LL5.lat = lat;
             break;
         case PositionOffsetLL_PR_position_LL6:
-            point->posOffset.offsetLL.choice.position_LL6.lon = lon;
+            point->posOffset.offsetLL.choice.position_LL6.lon = lng;
             point->posOffset.offsetLL.choice.position_LL6.lat = lat;
             break;
         case PositionOffsetLL_PR_position_LatLon:
-            point->posOffset.offsetLL.choice.position_LatLon.lon = lon;
+            point->posOffset.offsetLL.choice.position_LatLon.lon = lng;
             point->posOffset.offsetLL.choice.position_LatLon.lat = lat;
             break;
     }
 }
 
-void get_roadpoint(RoadPoint_t *point, long *lon, long *lat)
+void get_roadpoint(RoadPoint_t *point, long *lng, long *lat)
 {
     switch (point->posOffset.offsetLL.present) {
         case PositionOffsetLL_PR_position_LL1:
-            *lon = point->posOffset.offsetLL.choice.position_LL1.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LL1.lon;
             *lat = point->posOffset.offsetLL.choice.position_LL1.lat;
             break;
         case PositionOffsetLL_PR_position_LL2:
-            *lon = point->posOffset.offsetLL.choice.position_LL2.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LL2.lon;
             *lat = point->posOffset.offsetLL.choice.position_LL2.lat;
             break;
         case PositionOffsetLL_PR_position_LL3:
-            *lon = point->posOffset.offsetLL.choice.position_LL3.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LL3.lon;
             *lat = point->posOffset.offsetLL.choice.position_LL3.lat;
             break;
         case PositionOffsetLL_PR_position_LL4:
-            *lon = point->posOffset.offsetLL.choice.position_LL4.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LL4.lon;
             *lat = point->posOffset.offsetLL.choice.position_LL4.lat;
             break;
         case PositionOffsetLL_PR_position_LL5:
-            *lon = point->posOffset.offsetLL.choice.position_LL5.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LL5.lon;
             *lat = point->posOffset.offsetLL.choice.position_LL5.lat;
             break;
         case PositionOffsetLL_PR_position_LL6:
-            *lon = point->posOffset.offsetLL.choice.position_LL6.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LL6.lon;
             *lat = point->posOffset.offsetLL.choice.position_LL6.lat;
             break;
         case PositionOffsetLL_PR_position_LatLon:
-            *lon = point->posOffset.offsetLL.choice.position_LatLon.lon;
+            *lng = point->posOffset.offsetLL.choice.position_LatLon.lon;
             *lat = point->posOffset.offsetLL.choice.position_LatLon.lat;
             break;
         default :
-            *lon = 0;
+            *lng = 0;
             *lat = 0;
             break;
     }

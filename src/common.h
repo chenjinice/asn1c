@@ -12,7 +12,7 @@
 #define LOG_SIZE    300
 #define PRE_SIZE    40
 
-#define LON_MAX     (180*1e7)
+#define LNG_MAX     (180*1e7)
 #define LAT_MAX     (90*1e7)
 
 #define LANEWIDTH_MAX 32767
@@ -47,10 +47,10 @@ void encode(char *path, MessageFrame_t *msg);
 MessageFrame_t *decode(char *path);
 
 // roadPoint
-PositionOffsetLL_PR get_point_type(int lon, int lat, int bits);
+PositionOffsetLL_PR get_point_type(int lng, int lat, int bits);
 void get_type_str(PositionOffsetLL_PR type,char *str);
-void set_roadpoint(RoadPoint_t *point ,long lon,long lat,PositionOffsetLL_PR type);
-void get_roadpoint(RoadPoint_t *point ,long *lon,long *lat);
+void set_roadpoint(RoadPoint_t *point ,long lng,long lat,PositionOffsetLL_PR type);
+void get_roadpoint(RoadPoint_t *point ,long *lng,long *lat);
 
 #endif
 
