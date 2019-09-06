@@ -1,10 +1,17 @@
 {
-	"//" :" alertType 35 代表前方施工",
+	"1" :" alertType , 35 代表前方施工",
+	"2" : "alertRadius , 0 ~ 102.4 米",
+	"3" : "alertPath ,点的bits指多少位保存经纬度,可填64(绝对经纬度值)，或不填(相对值，程序自动分配位数)",
 
 
 	"lng" : 1128674224,
 	"lat" : 281137561,
-	"alertType" : 35
+	"alertType" : 35,
+	"alertRadius" : 20,
+	"alertPath"   : [
+		{"lng":215,"lat":2111},
+		{"lng":205,"lat":2441}
+	]
 }
 
 

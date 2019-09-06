@@ -151,7 +151,7 @@ static int check_speedLimits(cJSON *speedLimits,int level)
         double speed_double = speed->valuedouble;
         double tmp = (speed_double/SPEED_RESOLUTION);   // 需要搞个中间值，要不算出来的 speed_int 不对
         int speed_int = tmp;
-        sprintf(log+strlen(log),"type=%d,speed=%.2lf(%d)",type_int,speed_double,speed_int);
+        sprintf(log+strlen(log),"type=%d,speed=%.2lf(%d)m/s",type_int,speed_double,speed_int);
         printf("%s\n",log);
 
         if( check_int(type_int,SPEEDTYPE_MIN,SPEEDTYPE_MAX,pre,"type") != 0 )return ret;
@@ -341,7 +341,7 @@ static void add_points(PointList_t *pointlist,cJSON *points)
         road_point->posOffset.offsetLL.present = PositionOffsetLL_PR_position_LatLon;
         road_point->posOffset.offsetLL.choice.position_LatLon.lon = lng;
         road_point->posOffset.offsetLL.choice.position_LatLon.lat = lat;
-        set_roadpoint(road_point,lng,lat,point_type);
+        set_point(&road_point->posOffset,lng,lat,point_type);
 
         ASN_SET_ADD(&pointlist->list,road_point);
     }
@@ -499,7 +499,7 @@ void encode_map(char *json_file, char *uper_file)
 
     char *pre = "——————————";
     // 检查 json 文件是否符合 map 数据的要求
-    printf("%s check map json start %s\n",pre,pre);
+    printf("%s check map json %s\n",pre,pre);
     int ret = check_map_json(json);
     if(ret == 0)printf("%s check map json \e[32;40mOK\e[0m %s\n",pre,pre);
     else{printf("%s check map json \e[31;40mFAIL\e[0m %s\n",pre,pre);return;}
@@ -553,7 +553,6 @@ static void print_points(PointList_t *pointlist,int level)
 
     int i;
     long lng,lat;
-    char * type = "";
     char pre[PRE_SIZE] = {0};
     char str[100] = {0};
     get_pre(pre,"point",level);
@@ -561,7 +560,7 @@ static void print_points(PointList_t *pointlist,int level)
     int count = pointlist->list.count;
     for(i=0;i<count;i++){
         RoadPoint_t *point = pointlist->list.array[i];
-        get_roadpoint(point,&lng,&lat);
+        get_point(&point->posOffset,&lng,&lat);
         get_type_str(point->posOffset.offsetLL.present,str);
 
         printf("%s[%d] : lng=%ld,lat=%ld   (%s)\n",pre,i,lng,lat,str);
@@ -625,7 +624,7 @@ static void print_speedLimits(SpeedLimitList_t *speedlist,int level)
 
     for(i=0;i<count;i++){
         RegulatorySpeedLimit_t *limit = speedlist->list.array[i];
-        printf("%s[%d] : type=%ld,speed=%.2lf(%ld)\n",pre,i,limit->type,limit->speed*SPEED_RESOLUTION,limit->speed);
+        printf("%s[%d] : type=%ld,speed=%.2lf(%ld)m/s\n",pre,i,limit->type,limit->speed*SPEED_RESOLUTION,limit->speed);
     }
 }
 
