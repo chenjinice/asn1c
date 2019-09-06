@@ -490,12 +490,10 @@ static void add_links(LinkList_t *linklist,cJSON *links)
 }
 
 // 读取文件中的json数据，asn编码并保存到文件
-void encode_map(char *json_file, char *uper_file)
+void encode_map(cJSON *json, char *uper_file)
 {
     int i;
     MessageFrame_t *msgframe = NULL;
-    cJSON *json = read_json(json_file);
-    if(!json)return;
 
     char *pre = "——————————";
     // 检查 json 文件是否符合 map 数据的要求
@@ -532,7 +530,6 @@ void encode_map(char *json_file, char *uper_file)
             map_node->inLinks = inLinks;
             add_links(inLinks,links);
         }
-
         ASN_SET_ADD(&map->nodes.list,map_node);
     }
 

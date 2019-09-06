@@ -3,10 +3,11 @@
 
 
 #include <stdint.h>
+#include "cJSON.h"
 #include "MessageFrame.h"
 
 void print_rsi(MessageFrame_t *msg);
-void encode_rsi(char *json_file,char *uper_file);
+void encode_rsi(cJSON *json,char *uper_file);
 
 
 #endif

@@ -2,7 +2,7 @@
 CMakeLists.txt.user
 *.o
 build/*
-!build/README
+!build/ltevTool
 
 
 

@@ -141,7 +141,7 @@ void encode(char *path, MessageFrame_t *msg)
 {
     uint8_t buffer[BUFF_SIZE];
     asn_enc_rval_t rval  = uper_encode_to_buffer(&asn_DEF_MessageFrame, NULL, msg, buffer, BUFF_SIZE);
-    printf("encode size = %d , buffer_size = %d\n",rval.encoded,BUFF_SIZE);
+    printf("encode size = %d \n",rval.encoded);
     if (rval.encoded == -1)
     {
         printf( "encode \e[31;40mfail\e[0m : error = %s\n",(char *)rval.failed_type->name);
@@ -157,7 +157,7 @@ void encode(char *path, MessageFrame_t *msg)
 
 
 
-// -------------- roadpoint------------------------------------
+// -------------- point------------------------------------
 PositionOffsetLL_PR get_point_type(int lng, int lat, int bits)
 {
     PositionOffsetLL_PR ret = PositionOffsetLL_PR_NOTHING;

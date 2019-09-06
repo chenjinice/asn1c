@@ -4,7 +4,7 @@ project (ltev_tool)
 
 
 # 生成目标名
-set(TARGET ltev_tool)
+set(TARGET ltevTool)
 
 # 添加头文件目录 ，相当于Makefile的 -I
 include_directories(

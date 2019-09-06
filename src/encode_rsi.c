@@ -117,12 +117,9 @@ static void add_alertPath(PathPointList_t *path_list,cJSON *alertPath)
 }
 
 // 从文件读取 rsi 的 json 数据， 并用asn编码保存到文件
-void encode_rsi(char *json_file, char *uper_file)
+void encode_rsi(cJSON *json, char *uper_file)
 {
-    int i;
     MessageFrame_t *msgframe = NULL;
-    cJSON *json = read_json(json_file);
-    if(!json)return;
 
     char *pre = "——————————";
     // 检查 json 数据是否符合要求

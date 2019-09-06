@@ -5,8 +5,9 @@
 #include "common.h"
 #include "encode_map.h"
 #include "encode_rsi.h"
-#include "cJSON.h"
 
+
+//
 static void show_useage(){
     printf("version : 2019.09.06\n");
     //解码per文件
@@ -63,9 +64,9 @@ void encode_file(char *json_file,char *per_file)
     if(type)msg_type = type->valuestring;
 
     if(strcmp(msg_type,"map") == 0){
-        printf("map map\n");
+        encode_map(json,per_file);
     }else if(strcmp(msg_type,"rsi") == 0){
-        printf("rsi rsi\n");
+        encode_rsi(json,per_file);
     }else{
         printf("invalid type : %s \n",msg_type);
     }

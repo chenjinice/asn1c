@@ -30,7 +30,7 @@
 #define SPEED_MIN  0.0
 #define SPEED_RESOLUTION  0.02
 
-#define ALERTRADIUS_MAX  102.4
+#define ALERTRADIUS_MAX  102.4  // 1024*0.1
 
 #define DEFAULT_UPSTREAMID 0
 #define DEFAULT_LANEWIDTH  350
@@ -47,7 +47,7 @@ void write_file(char *path, uint8_t *buffer, int length);
 cJSON *read_json(char *path);
 void encode(char *path, MessageFrame_t *msg);
 
-// roadPoint
+// point
 PositionOffsetLL_PR get_point_type(int lng, int lat, int bits);
 void get_type_str(PositionOffsetLL_PR type,char *str);
 void set_point(PositionOffsetLLV_t *point , long lng, long lat, PositionOffsetLL_PR type);
