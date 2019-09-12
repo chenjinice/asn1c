@@ -38,7 +38,7 @@ static void decode_file(char *per_file)
     }else{
         printf("decode \e[32;40mOK\e[0m\n");
     }
-
+//    asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
     switch (msg->present) {
         case MessageFrame_PR_mapFrame:
             print_map(msg);
