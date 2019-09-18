@@ -151,7 +151,7 @@ static int check_speedLimits(cJSON *speedLimits,int level)
         double speed_double = speed->valuedouble;
         double tmp = (speed_double/SPEED_RESOLUTION);   // 需要搞个中间值，要不算出来的 speed_int 不对
         int speed_int = tmp;
-        sprintf(log+strlen(log),"type=%d,speed=%.2lf(%d)m/s",type_int,speed_double,speed_int);
+        sprintf(log+strlen(log),"type=%d,speed=%.2lfm/s(%d)",type_int,speed_double,speed_int);
         printf("%s\n",log);
 
         if( check_int(type_int,SPEEDTYPE_MIN,SPEEDTYPE_MAX,pre,"type") != 0 )return ret;
@@ -621,7 +621,7 @@ static void print_speedLimits(SpeedLimitList_t *speedlist,int level)
 
     for(i=0;i<count;i++){
         RegulatorySpeedLimit_t *limit = speedlist->list.array[i];
-        printf("%s[%d] : type=%ld,speed=%.2lf(%ld)m/s\n",pre,i,limit->type,limit->speed*SPEED_RESOLUTION,limit->speed);
+        printf("%s[%d] : type=%ld,speed=%.2lfm/s(%ld)\n",pre,i,limit->type,limit->speed*SPEED_RESOLUTION,limit->speed);
     }
 }
 

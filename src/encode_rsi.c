@@ -51,7 +51,7 @@ static int check_rsi_json(cJSON *json)
     get_pre(pre,"rsi",level);
 
     float radius = 0;
-    int path_num = 0;
+    int path_num = 0,radius_int = 0;
     cJSON *lng = cJSON_GetObjectItem(json,"lng");
     cJSON *lat = cJSON_GetObjectItem(json,"lat");
     cJSON *alertType = cJSON_GetObjectItem(json,"alertType");
@@ -62,8 +62,10 @@ static int check_rsi_json(cJSON *json)
     if(alertType == NULL){printf("error : no alertType\n");return ret;}
     if(alertRadius)radius = alertRadius->valuedouble;
     if(alertPath)path_num = cJSON_GetArraySize(alertPath);
-    printf("%s : lng=%d,lat=%d,alertType=%d,alertRadius=%.1fm,alertPath[%d]\n",pre,
-           lng->valueint,lat->valueint,alertType->valueint,radius,path_num);
+	float tmp = radius/ALERTRADIUS_RESOLUTION;
+	radius_int = tmp;
+    printf("%s : lng=%d,lat=%d,alertType=%d,alertRadius=%.1fm(%d),alertPath[%d]\n",pre,
+           lng->valueint,lat->valueint,alertType->valueint,radius,radius_int,path_num);
 
     if(check_int(lng->valueint,-LNG_MAX,LNG_MAX,pre,"lng") != 0)return ret;
     if(check_int(lat->valueint,-LAT_MAX,LAT_MAX,pre,"lat") != 0)return ret;
@@ -150,7 +152,8 @@ void encode_rsi(cJSON *json, char *uper_file)
     rsi->refPos.lat = lat;       // 纬度
     rsi->refPos.Long = lng;      // 经度
     rsi->alertType = alertType;  // 警告类型
-    rsi->alertRadius = radius*10; //国标分辨率是 10 cm,json文件里边是m,要转换
+	float tmp = radius/ALERTRADIUS_RESOLUTION;
+    rsi->alertRadius = tmp; //国标分辨率是 10 cm,json文件里边是m,要转换
     add_alertPath(&rsi->alertPath,alertPath);
 
     encode(uper_file,msgframe);
@@ -190,8 +193,9 @@ void print_rsi(MessageFrame_t *msg)
     get_pre(pre,"rsi",level);
 
     RSI_t rsi = msg->choice.rsiFrame;
-    printf("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm,alertPath[%d]\n",pre,
-           rsi.refPos.Long,rsi.refPos.lat,rsi.alertType,rsi.alertRadius*0.1,rsi.alertPath.list.count);
+	int count= rsi.alertPath.list.count;
+    printf("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm(%ld),alertPath[%d]\n",pre,
+           rsi.refPos.Long,rsi.refPos.lat,rsi.alertType,rsi.alertRadius*ALERTRADIUS_RESOLUTION,rsi.alertRadius,count);
 
     print_alertPath(&rsi.alertPath,level+1);
 

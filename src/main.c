@@ -9,11 +9,13 @@
 
 //
 static void show_useage(){
-    printf("version : 2019.09.06\n");
+    printf("version : 2019.09.18\n");
     //解码per文件
-    printf("-d perFile : decode perFile\n");
+//    printf("-d perFile : decode perFile\n");
+	printf("-d perFile : 解码per文件，并打印\n");
     // 从json文件编码并保存到per文件
-    printf("-e jsonFile perFile : encode from jsonFile to perFile\n");
+//    printf("-e jsonFile perFile : encode from jsonFile to perFile\n");
+	printf("-e jsonFile perFile : 读取json文件，编码并保存到per文件\n");
 }
 
 
