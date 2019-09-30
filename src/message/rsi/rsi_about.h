@@ -6,8 +6,8 @@
 #include "cJSON.h"
 #include "MessageFrame.h"
 
-void print_rsi(MessageFrame_t *msg);
-void encode_rsi(cJSON *json,char *uper_file);
+void rsiPrint(MessageFrame_t *msg);
+void rsiEncode(cJSON *json,char *uper_file);
 
 
 #endif

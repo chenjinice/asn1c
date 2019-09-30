@@ -1,0 +1,19 @@
+{
+	"1" :" alertType , 35 代表前方施工",
+	"2" : "alertRadius , 0 ~ 102.4 米",
+
+	"关于rsi" : "前方施工的rsi",
+
+	"type" : "rsi",
+	
+	"refPos" : {"lng":1128674224,"lat":281137561},
+	"alertType" : 35,
+	"alertRadius" : 20,
+	"//alertPath"   : [
+		{"lng":1128679880,"lat":281139561},
+		{"lng":1128676123,"lat":281138561}
+	]
+}
+
+
+
