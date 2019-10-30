@@ -32,20 +32,6 @@ void myprint(int type,const char *format,...)
     va_end(ap);
 }
 
-// 打印消息前缀
-void get_pre(char *pre,char *name,int level)
-{
-    int i;
-    char *format = (char *)"│ ";
-    char *format_last = (char *)"├ ";
-    pre[0] = 0;
-    for(i=0;i<level;i++){
-        if(i== level-1)sprintf(pre+strlen(pre),"%s",format_last);
-        else sprintf(pre+strlen(pre),"%s",format);
-    }
-    sprintf(pre+strlen(pre),"%s",name);
-}
-
 // 前缀,后缀
 char *getPreSuf(int level,char *key)
 {
@@ -225,4 +211,6 @@ void encode(char *path, MessageFrame_t *msg)
     myok("encode OK , size = %d\n",rval.encoded);
     writeToFile(path,buffer,rval.encoded);
 }
+
+
 

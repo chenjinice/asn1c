@@ -48,9 +48,9 @@ static int rsiJsonCheck(cJSON *json)
     float radius = 0;
     char *key_pos = "refPos" ,*key_type ="alertType" ,*key_radius = "alertRadius" ,*key_path = "alertPath";
     cJSON *refPos = cJSON_GetObjectItem(json,key_pos);
-    cJSON *alertType = cJSON_GetObjectItem(json,"alertType");
-    cJSON *alertRadius = cJSON_GetObjectItem(json,"alertRadius");
-    cJSON *alertPath = cJSON_GetObjectItem(json,"alertPath");
+    cJSON *alertType = cJSON_GetObjectItem(json,key_type);
+    cJSON *alertRadius = cJSON_GetObjectItem(json,key_radius);
+    cJSON *alertPath = cJSON_GetObjectItem(json,key_path);
     if(jsonIntRange(alertType,0,U16_MAX,pre,key_type)!=0)return ret;
     if(jsonDoubleRange(alertRadius,0,ALERTRADIUS_MAX,pre,key_radius)!=0)return;
     radius = alertRadius->valuedouble;
@@ -170,12 +170,12 @@ void rsiPrint(MessageFrame_t *msg)
 
     RSI_t rsi = msg->choice.rsiFrame;
 	int count= rsi.alertPath.list.count;
-    printf("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm(%ld),alertPath{%d}\n",pre,
+    mylog("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm(%ld),alertPath{%d}\n",pre,
            rsi.refPos.Long,rsi.refPos.lat,rsi.alertType,rsi.alertRadius*ALERTRADIUS_RESOLUTION,rsi.alertRadius,count);
 
     printAlertPath(&rsi.alertPath,level+1,rsi.refPos.Long,rsi.refPos.lat);
 
-    printf("%s\n",pre);
+    mylog("%s\n",pre);
 }
 
 

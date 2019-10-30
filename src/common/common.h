@@ -17,9 +17,6 @@
 
 void myprint(int type, const char *format,...);
 
-
-void get_pre(char *pre,char *name,int level);
-
 char *getPreSuf(int level, char *key);
 
 // file

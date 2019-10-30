@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 
+#include "common.h"
 #include "msg_common.h"
 
 

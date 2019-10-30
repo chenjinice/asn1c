@@ -7,6 +7,7 @@
 #include "map_about.h"
 #include "msg_common.h"
 #include "common.h"
+#include "point_algorithm.h"
 
 static long s_lng = 0;
 static long s_lat = 0;
@@ -119,7 +120,7 @@ static void printLinks(LinkList_t *list,int level)
 }
 
 // 打印 map 中的 nodes
-void printNodes(NodeListltev_t *list,int level)
+static void printNodes(NodeListltev_t *list,int level)
 {
     int i ,count;
     char *pre = getPreSuf(level,"nodes");
@@ -140,6 +141,53 @@ void printNodes(NodeListltev_t *list,int level)
     }
 }
 
+//
+static void test_algorithm(NodeListltev_t *list)
+{
+    int i,j,k,m,node_id=-1,lane_id=-1;
+    double min = 1e7;
+    MyPointWGS84 p,a,b;
+
+    p.lng = 121.1878775;p.lat = 31.2755822;
+
+    for(i=0;i<list->list.count;i++){
+        Node_t *node = list->list.array[i];
+        LinkList_t *link_list = node->inLinks;
+
+        for(j=0;j<link_list->list.count;j++){
+            Link_t *link = link_list->list.array[j];
+            LaneList_t *lane_list = &link->lanes;
+
+            for(k=0;k<lane_list->list.count;k++){
+                Lane_t *lane = lane_list->list.array[k];
+                PointList_t *point_list = lane->points;
+
+                for(m=0;m<point_list->list.count-1;m++){
+                    long lng1,lat1,lng2,lat2;
+                    int f;
+                    double d;
+                    RoadPoint_t *point1 = point_list->list.array[m];
+                    RoadPoint_t *point2 = point_list->list.array[m+1];
+                    getPoint(&point1->posOffset,&lng1,&lat1);
+                    getPoint(&point2->posOffset,&lng2,&lat2);
+                    a.lng = (lng1+node->refPos.Long)*1e-7;
+                    a.lat = (lat1+node->refPos.lat)*1e-7;
+                    b.lng = (lng2+node->refPos.Long)*1e-7;
+                    b.lat = (lat2+node->refPos.lat)*1e-7;
+                    d = minDistance(&p,&a,&b,&f);
+                    if(d < min){
+                        min = d;
+                        node_id = node->id.id;
+                        lane_id = lane->laneID;
+                    }
+//                    printf("node=%ld ,lane=%ld ,dist === %lf (%d)\n",node->id.id,lane->laneID,d,f);
+                }
+            }
+        }
+    }
+    printf("node=%d ,lane=%d ,dist === %lf\n",node_id,lane_id,min);
+}
+
 // 打印 map
 void mapPrint(MessageFrame_t *msg)
 {
@@ -151,6 +199,9 @@ void mapPrint(MessageFrame_t *msg)
     mylog("nodes[%d]\n",map.nodes.list.count);
 
     printNodes(&map.nodes,level+1);
+
+//    test_algorithm(&map.nodes);
+
     mylog("%s\n",pre);
 }
 

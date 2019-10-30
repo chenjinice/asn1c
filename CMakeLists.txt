@@ -2,11 +2,11 @@
 cmake_minimum_required (VERSION 2.6)
 project (ltevTool)
 
-
-add_definitions(-std=c++11)
+#add_definitions(-std=c++11)
 
 # 生成目标名
 set(TARGET ltevTool)
+
 # 添加头文件目录 ，相当于Makefile的 -I
 include_directories(
     ${CMAKE_SOURCE_DIR}/asn1/src
@@ -26,6 +26,7 @@ link_directories(
 add_executable(${TARGET}
     src/main.c
     src/common/common.c
+    src/common/point_algorithm.c
     src/cjson/cJSON.c
     src/message/msg_common.c
     src/message/map/map_check_jsion.c
