@@ -13,7 +13,7 @@
 #define myok(format,...) myprint(MY_OK,format,##__VA_ARGS__)
 #define myerr(format,...) myprint(MY_ERR,format,##__VA_ARGS__)
 
-#define BUFF_SIZE       10000
+#define BUFF_SIZE       100000
 
 void myprint(int type, const char *format,...);
 
