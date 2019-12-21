@@ -15,8 +15,9 @@
 
 #define BUFF_SIZE       100000
 
-void myprint(int type, const char *format,...);
 
+uint8_t byteReverse(uint8_t data);
+void myprint(int type, const char *format,...);
 char *getPreSuf(int level, char *key);
 
 // file
@@ -28,7 +29,7 @@ cJSON *readJson(char *path);
 
 
 // encode  &  decode
-void decodePerFile(char *per_file);
+void decodePerFile(char *per_file,int flag);
 void encode(char *path, MessageFrame_t *msg);
 void encodeJsonFile(char *json_file,char *per_file);
 

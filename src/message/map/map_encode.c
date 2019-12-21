@@ -88,7 +88,10 @@ static void addLanes(LaneList_t *list, cJSON *json)
             lane_maneuvers->buf = (uint8_t *)calloc(b_size,sizeof(uint8_t));
             lane_maneuvers->size = b_size;
             lane_maneuvers->bits_unused = 4;
-            memcpy(lane_maneuvers->buf,&maneuvers_int,b_size);
+			uint8_t low = byteReverse(maneuvers_int&0xFF);
+			uint8_t high= byteReverse( (maneuvers_int >> 8)%0xFF);
+            memcpy(lane_maneuvers->buf,&low,1);
+			memcpy(lane_maneuvers->buf+1,&high,1);
             map_lane->maneuvers = lane_maneuvers;
         }
         ASN_SET_ADD(&list->list,map_lane);

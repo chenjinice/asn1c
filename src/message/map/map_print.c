@@ -56,7 +56,12 @@ static void printLanes(LaneList_t *list,int level)
         int point_count = 0,connect_count = 0, maneuvers_int = 0;
         if(lane->points)point_count = lane->points->list.count;
         if(lane->connectsTo)connect_count = lane->connectsTo->list.count;
-        if(lane->maneuvers)memcpy(&maneuvers_int,lane->maneuvers->buf,lane->maneuvers->size);
+        if(lane->maneuvers){
+			int tmp = 0;
+			memcpy(&tmp,lane->maneuvers->buf,lane->maneuvers->size);
+			maneuvers_int |= byteReverse(tmp&0xFF);
+			maneuvers_int |= byteReverse((tmp>>8)&0xFF) << 8;
+		}
         mylog("%s[%d/%d] : laneID=%ld,points*{%d},connectsTo*{%d}",
                pre,i+1,count,lane->laneID,point_count,connect_count,maneuvers_int);
         if(lane->maneuvers)mylog(",maneuvers*=%d",maneuvers_int);

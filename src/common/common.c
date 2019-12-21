@@ -16,6 +16,18 @@
 static char *s_fix[] = {"│ ","├ "};
 
 
+// 字节按位倒序
+uint8_t byteReverse(uint8_t data)
+{
+	uint8_t i;
+	uint8_t value = 0;
+	for(i=0;i<8;i++){
+		value = value << 1;
+		value |= (data >> i)&0x01;
+	}
+	return value;
+}
+
 // 自己的打印函数
 void myprint(int type,const char *format,...)
 {
@@ -133,7 +145,7 @@ cJSON *readJson(char *path)
 }
 
 // 读取文件内容，解码
-void decodePerFile(char *per_file)
+void decodePerFile(char *per_file,int flag)
 {
     printf("=== decode <%s> ===\n",per_file);
 
@@ -155,7 +167,7 @@ void decodePerFile(char *per_file)
     }else{
         myok("decode OK\n");
     }
-//    asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
+    if(flag != 0)asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
     switch (msg->present) {
         case MessageFrame_PR_mapFrame:
             mapPrint(msg);

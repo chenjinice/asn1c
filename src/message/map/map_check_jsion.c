@@ -87,7 +87,7 @@ static int lanesJsonCheck(cJSON *json,int level,char *keyname)
         cJSON *maneuvers = cJSON_GetObjectItem(lane,key_mane);
         if(jsonIntRange(laneID,LANEID_MIN,LANEID_MAX,pre,key_laneid)!=0)return ret;
         if(maneuvers){
-            if(jsonIntRange(maneuvers,0,255,pre,key_mane)!=0)return ret;
+            if(jsonIntRange(maneuvers,0,4095,pre,key_mane)!=0)return ret;
         }
         mylog("%s[%d/%d] : laneID=%d",pre,i+1,count,laneID->valueint);
         if(maneuvers)mylog(",maneuvers*=%d",maneuvers->valueint);
