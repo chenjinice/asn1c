@@ -19,13 +19,13 @@ static char *s_fix[] = {"│ ","├ "};
 // 字节按位倒序
 uint8_t byteReverse(uint8_t data)
 {
-	uint8_t i;
-	uint8_t value = 0;
-	for(i=0;i<8;i++){
-		value = value << 1;
-		value |= (data >> i)&0x01;
-	}
-	return value;
+    uint8_t i;
+    uint8_t value = 0;
+    for(i=0;i<8;i++){
+        value = value << 1;
+        value |= (data >> i)&0x01;
+    }
+    return value;
 }
 
 // 自己的打印函数
@@ -169,15 +169,15 @@ void decodePerFile(char *per_file,int flag)
     }
     if(flag != 0)asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
     switch (msg->present) {
-        case MessageFrame_PR_mapFrame:
-            mapPrint(msg);
-            break;
-        case MessageFrame_PR_rsiFrame:
-            rsiPrint(msg);
-            break;
-        default:
-            myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
-            break;
+    case MessageFrame_PR_mapFrame:
+        mapPrint(msg);
+        break;
+    case MessageFrame_PR_rsiFrame:
+        rsiPrint(msg);
+        break;
+    default:
+        myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
+        break;
     }
     ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
 }
@@ -210,7 +210,7 @@ void encode(char *path, MessageFrame_t *msg)
 {
     uint8_t buffer[BUFF_SIZE];
     asn_enc_rval_t rval  = uper_encode_to_buffer(&asn_DEF_MessageFrame, NULL, msg, buffer, BUFF_SIZE);
-//    printf("encode size = %d \n",rval.encoded);
+    //    printf("encode size = %d \n",rval.encoded);
     if (rval.encoded == -1)
     {
         myerr( "encode fail : error = %s\n",(char *)rval.failed_type->name);

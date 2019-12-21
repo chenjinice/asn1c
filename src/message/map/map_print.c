@@ -57,13 +57,13 @@ static void printLanes(LaneList_t *list,int level)
         if(lane->points)point_count = lane->points->list.count;
         if(lane->connectsTo)connect_count = lane->connectsTo->list.count;
         if(lane->maneuvers){
-			int tmp = 0;
-			memcpy(&tmp,lane->maneuvers->buf,lane->maneuvers->size);
-			maneuvers_int |= byteReverse(tmp&0xFF);
-			maneuvers_int |= byteReverse((tmp>>8)&0xFF) << 8;
-		}
+            int tmp = 0;
+            memcpy(&tmp,lane->maneuvers->buf,lane->maneuvers->size);
+            maneuvers_int |= byteReverse(tmp&0xFF);
+            maneuvers_int |= byteReverse((tmp>>8)&0xFF) << 8;
+        }
         mylog("%s[%d/%d] : laneID=%ld,points*{%d},connectsTo*{%d}",
-               pre,i+1,count,lane->laneID,point_count,connect_count,maneuvers_int);
+              pre,i+1,count,lane->laneID,point_count,connect_count,maneuvers_int);
         if(lane->maneuvers)mylog(",maneuvers*=%d",maneuvers_int);
         mylog("\n");
 
@@ -114,7 +114,7 @@ static void printLinks(LinkList_t *list,int level)
         if(link->speedLimits)limit_count = link->speedLimits->list.count;
         if(link->movements)movement_count = link->movements->list.count;
         mylog("%s*[%d/%d] : laneWidth=%ld,lanes{%d},speedLimits*{%d},movements*{%d}\n",
-               pre,i+1,count,link->laneWidth,lane_count,limit_count,movement_count);
+              pre,i+1,count,link->laneWidth,lane_count,limit_count,movement_count);
 
         printNodeRefId(&link->upstreamNodeId,level+1,"upstreamNodeId");
         if(link->speedLimits)printSpeedLimits(link->speedLimits,level+1);
@@ -185,7 +185,7 @@ static void test_algorithm(NodeListltev_t *list)
                         node_id = node->id.id;
                         lane_id = lane->laneID;
                     }
-//                    printf("node=%ld ,lane=%ld ,dist === %lf (%d)\n",node->id.id,lane->laneID,d,f);
+                    //                    printf("node=%ld ,lane=%ld ,dist === %lf (%d)\n",node->id.id,lane->laneID,d,f);
                 }
             }
         }
@@ -205,7 +205,7 @@ void mapPrint(MessageFrame_t *msg)
 
     printNodes(&map.nodes,level+1);
 
-//    test_algorithm(&map.nodes);
+    //    test_algorithm(&map.nodes);
 
     mylog("%s\n",pre);
 }
