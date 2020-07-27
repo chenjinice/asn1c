@@ -47,17 +47,23 @@ static int rsiJsonCheck(cJSON *json)
 
     float radius = 0;
     char *key_pos = "refPos" ,*key_type ="alertType" ,*key_radius = "alertRadius" ,*key_path = "alertPath";
-    cJSON *refPos = cJSON_GetObjectItem(json,key_pos);
-    cJSON *alertType = cJSON_GetObjectItem(json,key_type);
-    cJSON *alertRadius = cJSON_GetObjectItem(json,key_radius);
-    cJSON *alertPath = cJSON_GetObjectItem(json,key_path);
+    char *key_des = "description";
+    cJSON *refPos           = cJSON_GetObjectItem(json,key_pos);
+    cJSON *alertType        = cJSON_GetObjectItem(json,key_type);
+    cJSON *alertRadius      = cJSON_GetObjectItem(json,key_radius);
+    cJSON *alertPath        = cJSON_GetObjectItem(json,key_path);
+    cJSON *description      = cJSON_GetObjectItem(json,key_des);
     if(jsonIntRange(alertType,0,U16_MAX,pre,key_type)!=0)return ret;
-    if(jsonDoubleRange(alertRadius,0,ALERTRADIUS_MAX,pre,key_radius)!=0)return;
+    if(jsonDoubleRange(alertRadius,0,ALERTRADIUS_MAX,pre,key_radius)!=0)return ret;
     radius = alertRadius->valuedouble;
 	float tmp = radius/ALERTRADIUS_RESOLUTION;
 	radius_int = tmp;
-    mylog("%s : alertType=%d,alertRadius=%.1fm(%d)\n",pre,alertType->valueint,radius,radius_int);
-
+    mylog("%s : alertType=%d,alertRadius=%.1fm(%d)",pre,alertType->valueint,radius,radius_int);
+    if(description){
+        mylog(",description=%s",description->valuestring);
+        if(jsonStrLenRange(description,1,256,pre,key_des)!=0)return ret;
+    }
+    mylog("\n");
     if(refPosJsonCheck(refPos,level+1,key_pos,&s_lng,&s_lat)!=0)return ret;
     if(alertPath){
         if(checkAlertPath(alertPath,level+1,key_path)!=0)return ret;
@@ -125,15 +131,16 @@ void rsiEncode(cJSON *json, char *uper_file)
     rsi->id.size = 8;
     rsi->rsiId = 0;
 
-    cJSON *refPos = cJSON_GetObjectItem(json,"refPos");
-    int alertType = cJSON_GetObjectItem(json,"alertType")->valueint;
-    cJSON *alertRadius = cJSON_GetObjectItem(json,"alertRadius");
-    cJSON *alertPath = cJSON_GetObjectItem(json,"alertPath");
-    if(alertRadius)radius = alertRadius->valuedouble;
-
+    cJSON *refPos           = cJSON_GetObjectItem(json,"refPos");
+    int alertType           = cJSON_GetObjectItem(json,"alertType")->valueint;
+    cJSON *alertRadius      = cJSON_GetObjectItem(json,"alertRadius");
+    cJSON *alertPath        = cJSON_GetObjectItem(json,"alertPath");
+    cJSON *description      = cJSON_GetObjectItem(json,"description");
+    if(alertRadius)radius   = alertRadius->valuedouble;
     rsi->alertType = alertType;  // 警告类型
 	float tmp = radius/ALERTRADIUS_RESOLUTION;
     rsi->alertRadius = tmp; //国标分辨率是 10 cm,json文件里边是m,要转换
+    rsi->description = addIA5String(description);
 
     addRefPos(&rsi->refPos,refPos,&s_lng,&s_lat);
     addAlertPath(&rsi->alertPath,alertPath);
@@ -170,9 +177,10 @@ void rsiPrint(MessageFrame_t *msg)
 
     RSI_t rsi = msg->choice.rsiFrame;
 	int count= rsi.alertPath.list.count;
-    mylog("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm(%ld),alertPath{%d}\n",pre,
+    mylog("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm(%ld),alertPath{%d}",pre,
            rsi.refPos.Long,rsi.refPos.lat,rsi.alertType,rsi.alertRadius*ALERTRADIUS_RESOLUTION,rsi.alertRadius,count);
-
+    if(rsi.description)mylog(",%s",rsi.description->buf);
+    mylog("\n");
     printAlertPath(&rsi.alertPath,level+1,rsi.refPos.Long,rsi.refPos.lat);
 
     mylog("%s\n",pre);

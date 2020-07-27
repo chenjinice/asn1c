@@ -144,7 +144,7 @@ static int movementsJsonCheck(cJSON *json,int level,char *keyname)
         cJSON *remoteIntersection = cJSON_GetObjectItem(move,key_remote);
         cJSON *phaseId = cJSON_GetObjectItem(move,key_phase);
         if(phaseId){
-            if(jsonIntRange(phaseId,PHASEID_MIN,PHASEID_MAX,pre,key_phase)!=0)return;
+            if(jsonIntRange(phaseId,PHASEID_MIN,PHASEID_MAX,pre,key_phase)!=0)return ret;
         }
         mylog("%s*[%d/%d] : ",pre,i+1,count);
         if(phaseId)mylog("phaseId*=%d",phaseId->valueint);

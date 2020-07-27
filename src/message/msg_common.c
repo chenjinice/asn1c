@@ -134,6 +134,24 @@ char *getPoint(PositionOffsetLLV_t *point, long *lng, long *lat)
     return str;
 }
 
+// 判断字符串长度是否在允许范围内
+int jsonStrLenRange(cJSON *json,int min,int max,char *pre,char *keyname)
+{
+    int ret = -1 ;
+    char *value = NULL;
+    if(json == NULL){
+        myerr("%s error, no %s\n",pre,keyname);
+        return ret;
+    }
+    value = json->valuestring;
+    int len = strlen(value);
+    if( (len < min) || (len > max) ){
+        myerr("%s error , str len = %d , must be %d~%d\n",pre,strlen(value),min,max);
+        return  ret;
+    }
+    return 0;
+}
+
 // 判断整数是否在范围内
 int jsonIntRange(cJSON *json, int min, int max, char *pre,char *keyname)
 {
@@ -261,6 +279,20 @@ void addNodeRefId(NodeReferenceID_t *nodeId,cJSON *json)
     }
 }
 
+// 添加IA5String
+IA5String_t *addIA5String(cJSON *json)
+{
+    IA5String_t *p = NULL;
+    if(json){
+        p            = (IA5String_t *)calloc(1,sizeof (IA5String_t));
+        char * value = json->valuestring;
+        int len      = strlen(value);
+        p->buf       = calloc(1,len);
+        p->size      = len;
+        memcpy(p->buf,value,len);
+    }
+    return p;
+}
 
 void printNodeRefId(NodeReferenceID_t *nodeid ,int level,char *name)
 {
@@ -269,4 +301,5 @@ void printNodeRefId(NodeReferenceID_t *nodeid ,int level,char *name)
     if(nodeid->region)mylog(",region*=%ld",*nodeid->region);
     mylog("\n");
 }
+
 

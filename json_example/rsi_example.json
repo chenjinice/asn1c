@@ -9,6 +9,7 @@
 	"refPos" : {"lng":1128674224,"lat":281137561},
 	"alertType" : 35,
 	"alertRadius" : 20,
+    "description" : "40",
 	"//alertPath"   : [
 		{"lng":1128679880,"lat":281139561},
 		{"lng":1128676123,"lat":281138561}

@@ -42,6 +42,8 @@ typedef struct _MyPoint{
 
 
 // check
+
+int jsonStrLenRange(cJSON *json,int min,int max,char *pre,char *keyname);
 int jsonArrayRange(cJSON *json, int min, int max, char *pre, char *keyname);
 int jsonIntRange(cJSON *json, int min, int max, char *pre, char *keyname);
 int jsonDoubleRange(cJSON *json, double min, double max, char *pre,char *keyname);
@@ -54,6 +56,7 @@ int nodeRefIDJsonCheck(cJSON *json,int level,char *keyname);
 // common add
 void addRefPos(Position3Dltev_t *pos, cJSON *json, long *lng_value, long *lat_value);
 void addNodeRefId(NodeReferenceID_t *nodeId,cJSON *json);
+IA5String_t *addIA5String(cJSON *json);
 
 // common print
 void printNodeRefId(NodeReferenceID_t *nodeid ,int level,char *name);
