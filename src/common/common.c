@@ -208,6 +208,7 @@ void encodeJsonFile(char *json_file,char *per_file)
 // asn编码 MessageFrame_t 类型数据，并将编码结果保存到文件
 void encode(char *path, MessageFrame_t *msg)
 {
+//    asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
     uint8_t buffer[BUFF_SIZE];
     asn_enc_rval_t rval  = uper_encode_to_buffer(&asn_DEF_MessageFrame, NULL, msg, buffer, BUFF_SIZE);
     //    printf("encode size = %d \n",rval.encoded);

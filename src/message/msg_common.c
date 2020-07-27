@@ -9,8 +9,7 @@
 
 #define POINTTYPE_COUNT 7
 static int s_bits[POINTTYPE_COUNT] = {24,28,32,36,44,48,64};
-static int s_lng_max[POINTTYPE_COUNT] = {2047,8191,32767,131071,2097151,8388607,LNG_MAX};
-static int s_lat_max[POINTTYPE_COUNT] = {2047,8191,32767,131071,2097151,8388607,LAT_MAX};
+static int s_max[POINTTYPE_COUNT] = {2047,8191,32767,131071,2097151,8388607,LNG_MAX};
 
 
 // -------------- point------------------------------------
@@ -20,32 +19,31 @@ PositionOffsetLL_PR getOffsetLL(long ref_lng, long ref_lat, long lng, long lat, 
     static char str[100];
     memset(str,0,sizeof(str));
 
+    PositionOffsetLL_PR present = PositionOffsetLL_PR_position_LatLon;
     int64_t lng_tmp = (int64_t)lng - (int64_t)ref_lng;
     int     lat_tmp = lat - ref_lat;
-    if(lng_tmp > LNG_MAX) lng_tmp -= LNG_MAX;
-    if(lng_tmp < -LNG_MAX)lng_tmp += LNG_MAX;
+    if(lng_tmp > LNG_MAX) {lng_tmp -= LNG_MAX;lng_tmp -= LNG_MAX;}
+    if(lng_tmp < -LNG_MAX){lng_tmp += LNG_MAX;lng_tmp += LNG_MAX;}
 
     int lng_abs = abs(lng_tmp),lat_abs = abs(lat_tmp),i;
-    int lng_indx = -1,lat_index = -1,index = -1;
-
+    int lng_indx = -1,lat_index = -1;
+    int abs_max = lng_abs > lat_abs ? lng_abs : lat_abs;
     for(i=0;i<POINTTYPE_COUNT;i++){
-        if(lng_abs <= s_lng_max[i]){lng_indx = i;break;}
+        if(abs_max <= s_max[i]){present = i+1;break;}
     }
-    for(i=0;i<POINTTYPE_COUNT;i++){
-        if(lat_abs <= s_lat_max[i]){lat_index = i;break;}
-    }
-    index = lng_indx > lat_index ? lng_indx : lat_index;
-    index += 1;
 
-    if( (index > PositionOffsetLL_PR_NOTHING) && (index < PositionOffsetLL_PR_position_LatLon) ) {
-        sprintf(str,"LL%d:%d:%d",index,s_bits[index-1],s_lng_max[index-1]);
-    }else if(index == PositionOffsetLL_PR_position_LatLon){
+    if( present < PositionOffsetLL_PR_position_LatLon ) {
+        *lng_offset = (int)lng_tmp;
+        *lat_offset = lat_tmp;
+        sprintf(str,"LL%d:%d:%d",present,s_bits[present-1],s_max[present-1]);
+    }else if(present == PositionOffsetLL_PR_position_LatLon){
+        *lng_offset = lng;
+        *lat_offset = lat;
         sprintf(str,"LatLon:64");
     }
-    *lng_offset = (int)lng_tmp;
-    *lat_offset = lat_tmp;
+
     if(log)*log = str;
-    return index;
+    return present;
 }
 
 void setOffsetLL(PositionOffsetLLV_t *point, long lng, long lat, PositionOffsetLL_PR type)
@@ -125,7 +123,7 @@ char *getPoint(PositionOffsetLLV_t *point, long *lng, long *lat)
     }
 
     if( (type > PositionOffsetLL_PR_NOTHING) && (type < PositionOffsetLL_PR_position_LatLon) ) {
-        sprintf(str,"LL%d:%d:%d",type,s_bits[type-1],s_lng_max[type-1]);
+        sprintf(str,"LL%d:%d:%d",type,s_bits[type-1],s_max[type-1]);
     }else if(type == PositionOffsetLL_PR_position_LatLon){
         sprintf(str,"LatLon:64");
     }else{

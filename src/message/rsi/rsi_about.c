@@ -165,7 +165,11 @@ static void printAlertPath(PathPointList_t *alertpath,int level,int ref_lng,int 
         long lng,lat;
         PositionOffsetLLV_t *point = alertpath->list.array[i];
         char *str = getPoint(point,&lng,&lat);
-        mylog("%s[%d/%d] : lng=%ld,lat=%ld (%ld,%ld) (%s)\n",pre,i+1,count,ref_lng+lng,ref_lat+lat,lng,lat,str);
+        if(point->offsetLL.present == PositionOffsetLL_PR_position_LatLon){
+            mylog("%s[%d/%d] : lng=%ld,lat=%ld (%s)\n",pre,i+1,count,lng,lat,str);
+        }else{
+            mylog("%s[%d/%d] : lng=%ld,lat=%ld (%ld,%ld) (%s)\n",pre,i+1,count,ref_lng+lng,ref_lat+lat,lng,lat,str);
+        }
     }
 }
 

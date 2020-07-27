@@ -24,7 +24,10 @@ static void printPoints(PointList_t *list,int level,long ref_lng,long ref_lat)
         long lng,lat;
         RoadPoint_t *point = list->list.array[i];
         char *str = getPoint(&point->posOffset,&lng,&lat);
-        mylog("%s*[%d/%d] : lng=%ld,lat=%ld (%ld,%ld) (%s)\n",pre,i+1,count,ref_lng+lng,ref_lat+lat,lng,lat,str);
+        if(point->posOffset.offsetLL.present == PositionOffsetLL_PR_position_LatLon)
+            mylog("*%s[%d/%d] : lng=%ld,lat=%ld (%s)\n",pre,i+1,count,lng,lat,str);
+        else
+            mylog("%s*[%d/%d] : lng=%ld,lat=%ld (%ld,%ld) (%s)\n",pre,i+1,count,ref_lng+lng,ref_lat+lat,lng,lat,str);
     }
 }
 
