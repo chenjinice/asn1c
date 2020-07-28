@@ -221,8 +221,9 @@ void encode(char *path, MessageFrame_t *msg)
         myerr("encode fail : size(%d) > buffer_size(%d) \n",rval.encoded,BUFF_SIZE);
         return;
     }
-    myok("encode OK , size = %d\n",rval.encoded);
-    writeToFile(path,buffer,rval.encoded);
+    int save_size = (rval.encoded + 7) >> 3;
+    myok("encode OK , encode size = %d,save size = %d\n",rval.encoded,save_size);
+    writeToFile(path,buffer,save_size);
 }
 
 
