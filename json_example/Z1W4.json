@@ -21,8 +21,8 @@
                          ],
 					"lanes" : [
 						{	
-							"laneID" : 4,
-                            "maneuvers" : 2,
+							"laneID" : 3,
+                            "maneuvers" : 4,
 							"points" : [ {"lng":1128673059,"lat":281138837},{"lng":1128668293,"lat":281131012} ]
 						},
 						{
