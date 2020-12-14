@@ -145,7 +145,7 @@ cJSON *readJson(char *path)
 }
 
 // 读取文件内容，解码
-void decodePerFile(char *per_file,int flag)
+void decodePerFile(char *per_file)
 {
     printf("=== decode <%s> ===\n",per_file);
 
@@ -167,18 +167,19 @@ void decodePerFile(char *per_file,int flag)
     }else{
         myok("decode OK\n");
     }
-    if(flag != 0)asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
-    switch (msg->present) {
-    case MessageFrame_PR_mapFrame:
-        mapPrint(msg);
-        break;
-    case MessageFrame_PR_rsiFrame:
-        rsiPrint(msg);
-        break;
-    default:
-        myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
-        break;
-    }
+    asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
+
+//    switch (msg->present) {
+//    case MessageFrame_PR_mapFrame:
+//        mapPrint(msg);
+//        break;
+//    case MessageFrame_PR_rsiFrame:
+//        rsiPrint(msg);
+//        break;
+//    default:
+//        myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
+//        break;
+//    }
     ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
 }
 

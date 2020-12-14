@@ -29,7 +29,7 @@ cJSON *readJson(char *path);
 
 
 // encode  &  decode
-void decodePerFile(char *per_file,int flag);
+void decodePerFile(char *per_file);
 void encode(char *path, MessageFrame_t *msg);
 void encodeJsonFile(char *json_file,char *per_file);
 

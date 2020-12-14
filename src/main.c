@@ -31,8 +31,8 @@ int main(int argc,char *argv[])
     while ((opt = getopt(argc, argv, string)) != -1){
         switch (opt) {
         case 'e': encodeJsonFile(optarg,argv[optind]); break;
-        case 'd': decodePerFile(optarg,0); break;
-        case 'l': decodePerFile(optarg,1); break;
+        case 'd': decodePerFile(optarg); break;
+        case 'l': decodePerFile(optarg); break;
         default : show_useage(); break;
         }
     }

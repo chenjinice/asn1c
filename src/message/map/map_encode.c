@@ -150,6 +150,7 @@ static void addLinks(LinkList_t *list,cJSON *json)
         cJSON *lanes = cJSON_GetObjectItem(link,"lanes");
         cJSON *speedlimits = cJSON_GetObjectItem(link,"speedLimits");
         cJSON *movements = cJSON_GetObjectItem(link,"movements");
+        cJSON *points    = cJSON_GetObjectItem(link,"points");
         if(laneWidth)width = laneWidth->valueint;
         map_link->laneWidth = width;
         addNodeRefId(&map_link->upstreamNodeId,upstreamNodeId);
@@ -163,6 +164,11 @@ static void addLinks(LinkList_t *list,cJSON *json)
             MovementList_t *movelist = (MovementList_t *)calloc(1,sizeof(MovementList_t));
             map_link->movements = movelist;
             addMovements(movelist,movements);
+        }
+        if(points){
+            PointList_t *pointlist = (PointList_t *)calloc(1,sizeof(PointList_t));
+            map_link->points = pointlist;
+            addPoints(map_link->points,points);
         }
         ASN_SET_ADD(&list->list,map_link);
     }
