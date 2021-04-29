@@ -1,0 +1,70 @@
+{
+	"1" : "upstreamNodeId(国标必须有，为简化json，可不写，程序默认0)",
+	"2" : "laneWidth : 0~32767 , 单位 cm (国标必须有，为简化json，可不写，程序默认350)",
+	"3" : "speedLimits,1-9个元素,每个元素中 : type 为 0-12,  speed 为 0～163.82 ，单位为 m/s ", 
+	"4" : "maneuvers有12位，某些位意义： 0-可直行，1-可左转，2-可右转，3-可u型转弯",
+
+	"关于地图" : "12号路口",
+
+	"type" : "map",
+
+	"nodes":[
+		{
+			"id" : {"id":12,"//region":0},
+			"refPos" : {"lng":1167394116,"lat":401990285},
+			"links" : [
+				{
+					"laneWidth" : 350,
+					"speedLimits" : [ {"type":3,"speed":6} ],
+					"movements" : [ 
+						{"remoteIntersection":{"id":12,"//region":0},"phaseId":4}, 
+						{"remoteIntersection":{"id":12,"//region":0},"phaseId":5}, 
+						{"remoteIntersection":{"id":12,"//region":0},"phaseId":6} 					
+					],
+					"lanes" : [
+						{
+							"laneID" : 1,
+							"maneuvers" : 3,
+							"points" : [
+								{"lng":1167394106,"lat":401990275} ,
+								{"lng":1167392993,"lat":401977316} 
+							]
+						},
+						{
+							"laneID" : 2,
+							"points" : [
+								{"lng":1167393703,"lat":401990298} ,
+								{"lng":1167392841,"lat":401977446}
+							]
+						}
+					]
+				},
+				{
+					"laneWidth" : 350,
+					"speedLimits" : [ {"type":3,"speed":6} ],
+					"movements" : [ 
+						{"remoteIntersection":{"id":12,"//region":0},"phaseId":1}, 
+						{"remoteIntersection":{"id":12,"//region":0},"phaseId":2},
+						{"remoteIntersection":{"id":12,"//region":0},"phaseId":3}
+					],
+					"lanes" : [
+						{
+							"laneID" : 3,
+							"maneuvers" : 3,
+							"points" : [
+								{"lng":1167390925,"lat":401991963} ,
+								{"lng":1167380205,"lat":401991996} 
+							]
+						}
+					]
+			  }
+			]
+		}
+
+	]
+
+	
+}
+
+
+

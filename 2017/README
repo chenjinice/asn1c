@@ -1,5 +1,7 @@
-ltev_tool:json 转 asn的per编码，并保存到本地文件
-   
+ltev_tool:json 转 asn的per编码,并保存到本地文件
+asn协议为国标2017版本
+
+
 编译:            
   mkdir build    
   cd    build    

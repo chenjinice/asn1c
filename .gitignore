@@ -1,5 +1,5 @@
 
-CMakeLists.txt.user
+*CMakeLists.txt.user*
 *.o
 build/*
 !build/ltevTool
