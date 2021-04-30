@@ -26,13 +26,9 @@ cleanall:clean
 regenerate:
 # asn1c 版本 asn1c-0.9.29 , 生成的文件注释里有写了asn1c的版本和命令等信息
 #	asn1c -fskeletons-copy -fnative-types -gen-PER -pdu=auto -no-gen-example LTEV.asn -D $(DIR)
-	asn1c -fskeletons-copy -fnative-types -gen-PER -pdu=auto LTEV.asn -D $(DIR)
-	-rm $(DIR)/Makefile.am.*
-	-rm $(DIR)/converter-example.*
+#	asn1c -fskeletons-copy -fnative-types -gen-PER -pdu=auto LTEV.asn -D $(DIR)
+	asn1c -fskeletons-copy -fnative-types -gen-PER -pdu=auto -no-gen-example asn/*.asn -D $(DIR)
 	
-
-
-
 
 
 

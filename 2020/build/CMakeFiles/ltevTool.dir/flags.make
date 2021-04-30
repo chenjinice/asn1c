@@ -6,5 +6,5 @@ C_FLAGS =
 
 C_DEFINES = 
 
-C_INCLUDES = -I/home/chen/Desktop/ltev_tool/asn1/src -I/home/chen/Desktop/ltev_tool/src -I/home/chen/Desktop/ltev_tool/src/cjson -I/home/chen/Desktop/ltev_tool/src/common -I/home/chen/Desktop/ltev_tool/src/message -I/home/chen/Desktop/ltev_tool/src/message/map -I/home/chen/Desktop/ltev_tool/src/message/rsi 
+C_INCLUDES = -I/home/chen/Desktop/ltev_tool/2020/asn/src -I/home/chen/Desktop/ltev_tool/2020/src -I/home/chen/Desktop/ltev_tool/2020/src/cjson -I/home/chen/Desktop/ltev_tool/2020/src/common -I/home/chen/Desktop/ltev_tool/2020/src/message -I/home/chen/Desktop/ltev_tool/2020/src/message/map -I/home/chen/Desktop/ltev_tool/2020/src/message/rsi 
 

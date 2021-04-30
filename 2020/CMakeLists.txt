@@ -9,7 +9,7 @@ set(TARGET ltevTool)
 
 # 添加头文件目录 ，相当于Makefile的 -I
 include_directories(
-    ${CMAKE_SOURCE_DIR}/asn1/src
+    ${CMAKE_SOURCE_DIR}/asn/src
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/cjson
     ${CMAKE_SOURCE_DIR}/src/common
@@ -36,7 +36,7 @@ add_executable(${TARGET}
 )
 
 target_link_libraries(${TARGET}
-    ltev_asn1
+    ltev_asn_2020
     m
 )
 
