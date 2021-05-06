@@ -123,248 +123,221 @@ ltevTool/fast:
 	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/build
 .PHONY : ltevTool/fast
 
-src/cjson/cJSON.o: src/cjson/cJSON.c.o
+main.o: main.cpp.o
 
-.PHONY : src/cjson/cJSON.o
-
-# target to build an object file
-src/cjson/cJSON.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/cjson/cJSON.c.o
-.PHONY : src/cjson/cJSON.c.o
-
-src/cjson/cJSON.i: src/cjson/cJSON.c.i
-
-.PHONY : src/cjson/cJSON.i
-
-# target to preprocess a source file
-src/cjson/cJSON.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/cjson/cJSON.c.i
-.PHONY : src/cjson/cJSON.c.i
-
-src/cjson/cJSON.s: src/cjson/cJSON.c.s
-
-.PHONY : src/cjson/cJSON.s
-
-# target to generate assembly for a file
-src/cjson/cJSON.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/cjson/cJSON.c.s
-.PHONY : src/cjson/cJSON.c.s
-
-src/common/common.o: src/common/common.c.o
-
-.PHONY : src/common/common.o
+.PHONY : main.o
 
 # target to build an object file
-src/common/common.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common/common.c.o
-.PHONY : src/common/common.c.o
+main.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/main.cpp.o
+.PHONY : main.cpp.o
 
-src/common/common.i: src/common/common.c.i
+main.i: main.cpp.i
 
-.PHONY : src/common/common.i
+.PHONY : main.i
 
 # target to preprocess a source file
-src/common/common.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common/common.c.i
-.PHONY : src/common/common.c.i
+main.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/main.cpp.i
+.PHONY : main.cpp.i
 
-src/common/common.s: src/common/common.c.s
+main.s: main.cpp.s
 
-.PHONY : src/common/common.s
+.PHONY : main.s
 
 # target to generate assembly for a file
-src/common/common.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common/common.c.s
-.PHONY : src/common/common.c.s
+main.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/main.cpp.s
+.PHONY : main.cpp.s
 
-src/common/point_algorithm.o: src/common/point_algorithm.c.o
+src/cJSON.o: src/cJSON.c.o
 
-.PHONY : src/common/point_algorithm.o
+.PHONY : src/cJSON.o
 
 # target to build an object file
-src/common/point_algorithm.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common/point_algorithm.c.o
-.PHONY : src/common/point_algorithm.c.o
+src/cJSON.c.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/cJSON.c.o
+.PHONY : src/cJSON.c.o
 
-src/common/point_algorithm.i: src/common/point_algorithm.c.i
+src/cJSON.i: src/cJSON.c.i
 
-.PHONY : src/common/point_algorithm.i
+.PHONY : src/cJSON.i
 
 # target to preprocess a source file
-src/common/point_algorithm.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common/point_algorithm.c.i
-.PHONY : src/common/point_algorithm.c.i
+src/cJSON.c.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/cJSON.c.i
+.PHONY : src/cJSON.c.i
 
-src/common/point_algorithm.s: src/common/point_algorithm.c.s
+src/cJSON.s: src/cJSON.c.s
 
-.PHONY : src/common/point_algorithm.s
+.PHONY : src/cJSON.s
 
 # target to generate assembly for a file
-src/common/point_algorithm.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common/point_algorithm.c.s
-.PHONY : src/common/point_algorithm.c.s
+src/cJSON.c.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/cJSON.c.s
+.PHONY : src/cJSON.c.s
 
-src/main.o: src/main.c.o
+src/common.o: src/common.cpp.o
 
-.PHONY : src/main.o
+.PHONY : src/common.o
 
 # target to build an object file
-src/main.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/main.c.o
-.PHONY : src/main.c.o
+src/common.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common.cpp.o
+.PHONY : src/common.cpp.o
 
-src/main.i: src/main.c.i
+src/common.i: src/common.cpp.i
 
-.PHONY : src/main.i
+.PHONY : src/common.i
 
 # target to preprocess a source file
-src/main.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/main.c.i
-.PHONY : src/main.c.i
+src/common.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common.cpp.i
+.PHONY : src/common.cpp.i
 
-src/main.s: src/main.c.s
+src/common.s: src/common.cpp.s
 
-.PHONY : src/main.s
+.PHONY : src/common.s
 
 # target to generate assembly for a file
-src/main.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/main.c.s
-.PHONY : src/main.c.s
+src/common.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/common.cpp.s
+.PHONY : src/common.cpp.s
 
-src/message/map/map_check_jsion.o: src/message/map/map_check_jsion.c.o
+src/convert_common.o: src/convert_common.cpp.o
 
-.PHONY : src/message/map/map_check_jsion.o
+.PHONY : src/convert_common.o
 
 # target to build an object file
-src/message/map/map_check_jsion.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_check_jsion.c.o
-.PHONY : src/message/map/map_check_jsion.c.o
+src/convert_common.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/convert_common.cpp.o
+.PHONY : src/convert_common.cpp.o
 
-src/message/map/map_check_jsion.i: src/message/map/map_check_jsion.c.i
+src/convert_common.i: src/convert_common.cpp.i
 
-.PHONY : src/message/map/map_check_jsion.i
+.PHONY : src/convert_common.i
 
 # target to preprocess a source file
-src/message/map/map_check_jsion.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_check_jsion.c.i
-.PHONY : src/message/map/map_check_jsion.c.i
+src/convert_common.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/convert_common.cpp.i
+.PHONY : src/convert_common.cpp.i
 
-src/message/map/map_check_jsion.s: src/message/map/map_check_jsion.c.s
+src/convert_common.s: src/convert_common.cpp.s
 
-.PHONY : src/message/map/map_check_jsion.s
+.PHONY : src/convert_common.s
 
 # target to generate assembly for a file
-src/message/map/map_check_jsion.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_check_jsion.c.s
-.PHONY : src/message/map/map_check_jsion.c.s
+src/convert_common.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/convert_common.cpp.s
+.PHONY : src/convert_common.cpp.s
 
-src/message/map/map_encode.o: src/message/map/map_encode.c.o
+src/map/map_check_jsion.o: src/map/map_check_jsion.cpp.o
 
-.PHONY : src/message/map/map_encode.o
+.PHONY : src/map/map_check_jsion.o
 
 # target to build an object file
-src/message/map/map_encode.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_encode.c.o
-.PHONY : src/message/map/map_encode.c.o
+src/map/map_check_jsion.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_check_jsion.cpp.o
+.PHONY : src/map/map_check_jsion.cpp.o
 
-src/message/map/map_encode.i: src/message/map/map_encode.c.i
+src/map/map_check_jsion.i: src/map/map_check_jsion.cpp.i
 
-.PHONY : src/message/map/map_encode.i
+.PHONY : src/map/map_check_jsion.i
 
 # target to preprocess a source file
-src/message/map/map_encode.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_encode.c.i
-.PHONY : src/message/map/map_encode.c.i
+src/map/map_check_jsion.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_check_jsion.cpp.i
+.PHONY : src/map/map_check_jsion.cpp.i
 
-src/message/map/map_encode.s: src/message/map/map_encode.c.s
+src/map/map_check_jsion.s: src/map/map_check_jsion.cpp.s
 
-.PHONY : src/message/map/map_encode.s
+.PHONY : src/map/map_check_jsion.s
 
 # target to generate assembly for a file
-src/message/map/map_encode.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_encode.c.s
-.PHONY : src/message/map/map_encode.c.s
+src/map/map_check_jsion.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_check_jsion.cpp.s
+.PHONY : src/map/map_check_jsion.cpp.s
 
-src/message/map/map_print.o: src/message/map/map_print.c.o
+src/map/map_encode.o: src/map/map_encode.cpp.o
 
-.PHONY : src/message/map/map_print.o
+.PHONY : src/map/map_encode.o
 
 # target to build an object file
-src/message/map/map_print.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_print.c.o
-.PHONY : src/message/map/map_print.c.o
+src/map/map_encode.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_encode.cpp.o
+.PHONY : src/map/map_encode.cpp.o
 
-src/message/map/map_print.i: src/message/map/map_print.c.i
+src/map/map_encode.i: src/map/map_encode.cpp.i
 
-.PHONY : src/message/map/map_print.i
+.PHONY : src/map/map_encode.i
 
 # target to preprocess a source file
-src/message/map/map_print.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_print.c.i
-.PHONY : src/message/map/map_print.c.i
+src/map/map_encode.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_encode.cpp.i
+.PHONY : src/map/map_encode.cpp.i
 
-src/message/map/map_print.s: src/message/map/map_print.c.s
+src/map/map_encode.s: src/map/map_encode.cpp.s
 
-.PHONY : src/message/map/map_print.s
+.PHONY : src/map/map_encode.s
 
 # target to generate assembly for a file
-src/message/map/map_print.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/map/map_print.c.s
-.PHONY : src/message/map/map_print.c.s
+src/map/map_encode.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_encode.cpp.s
+.PHONY : src/map/map_encode.cpp.s
 
-src/message/msg_common.o: src/message/msg_common.c.o
+src/map/map_print.o: src/map/map_print.cpp.o
 
-.PHONY : src/message/msg_common.o
+.PHONY : src/map/map_print.o
 
 # target to build an object file
-src/message/msg_common.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/msg_common.c.o
-.PHONY : src/message/msg_common.c.o
+src/map/map_print.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_print.cpp.o
+.PHONY : src/map/map_print.cpp.o
 
-src/message/msg_common.i: src/message/msg_common.c.i
+src/map/map_print.i: src/map/map_print.cpp.i
 
-.PHONY : src/message/msg_common.i
+.PHONY : src/map/map_print.i
 
 # target to preprocess a source file
-src/message/msg_common.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/msg_common.c.i
-.PHONY : src/message/msg_common.c.i
+src/map/map_print.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_print.cpp.i
+.PHONY : src/map/map_print.cpp.i
 
-src/message/msg_common.s: src/message/msg_common.c.s
+src/map/map_print.s: src/map/map_print.cpp.s
 
-.PHONY : src/message/msg_common.s
+.PHONY : src/map/map_print.s
 
 # target to generate assembly for a file
-src/message/msg_common.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/msg_common.c.s
-.PHONY : src/message/msg_common.c.s
+src/map/map_print.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/map/map_print.cpp.s
+.PHONY : src/map/map_print.cpp.s
 
-src/message/rsi/rsi_about.o: src/message/rsi/rsi_about.c.o
+src/rsi/rsi_about.o: src/rsi/rsi_about.cpp.o
 
-.PHONY : src/message/rsi/rsi_about.o
+.PHONY : src/rsi/rsi_about.o
 
 # target to build an object file
-src/message/rsi/rsi_about.c.o:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/rsi/rsi_about.c.o
-.PHONY : src/message/rsi/rsi_about.c.o
+src/rsi/rsi_about.cpp.o:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/rsi/rsi_about.cpp.o
+.PHONY : src/rsi/rsi_about.cpp.o
 
-src/message/rsi/rsi_about.i: src/message/rsi/rsi_about.c.i
+src/rsi/rsi_about.i: src/rsi/rsi_about.cpp.i
 
-.PHONY : src/message/rsi/rsi_about.i
+.PHONY : src/rsi/rsi_about.i
 
 # target to preprocess a source file
-src/message/rsi/rsi_about.c.i:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/rsi/rsi_about.c.i
-.PHONY : src/message/rsi/rsi_about.c.i
+src/rsi/rsi_about.cpp.i:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/rsi/rsi_about.cpp.i
+.PHONY : src/rsi/rsi_about.cpp.i
 
-src/message/rsi/rsi_about.s: src/message/rsi/rsi_about.c.s
+src/rsi/rsi_about.s: src/rsi/rsi_about.cpp.s
 
-.PHONY : src/message/rsi/rsi_about.s
+.PHONY : src/rsi/rsi_about.s
 
 # target to generate assembly for a file
-src/message/rsi/rsi_about.c.s:
-	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/message/rsi/rsi_about.c.s
-.PHONY : src/message/rsi/rsi_about.c.s
+src/rsi/rsi_about.cpp.s:
+	$(MAKE) -f CMakeFiles/ltevTool.dir/build.make CMakeFiles/ltevTool.dir/src/rsi/rsi_about.cpp.s
+.PHONY : src/rsi/rsi_about.cpp.s
 
 # Help Target
 help:
@@ -375,33 +348,30 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ltevTool"
-	@echo "... src/cjson/cJSON.o"
-	@echo "... src/cjson/cJSON.i"
-	@echo "... src/cjson/cJSON.s"
-	@echo "... src/common/common.o"
-	@echo "... src/common/common.i"
-	@echo "... src/common/common.s"
-	@echo "... src/common/point_algorithm.o"
-	@echo "... src/common/point_algorithm.i"
-	@echo "... src/common/point_algorithm.s"
-	@echo "... src/main.o"
-	@echo "... src/main.i"
-	@echo "... src/main.s"
-	@echo "... src/message/map/map_check_jsion.o"
-	@echo "... src/message/map/map_check_jsion.i"
-	@echo "... src/message/map/map_check_jsion.s"
-	@echo "... src/message/map/map_encode.o"
-	@echo "... src/message/map/map_encode.i"
-	@echo "... src/message/map/map_encode.s"
-	@echo "... src/message/map/map_print.o"
-	@echo "... src/message/map/map_print.i"
-	@echo "... src/message/map/map_print.s"
-	@echo "... src/message/msg_common.o"
-	@echo "... src/message/msg_common.i"
-	@echo "... src/message/msg_common.s"
-	@echo "... src/message/rsi/rsi_about.o"
-	@echo "... src/message/rsi/rsi_about.i"
-	@echo "... src/message/rsi/rsi_about.s"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
+	@echo "... src/cJSON.o"
+	@echo "... src/cJSON.i"
+	@echo "... src/cJSON.s"
+	@echo "... src/common.o"
+	@echo "... src/common.i"
+	@echo "... src/common.s"
+	@echo "... src/convert_common.o"
+	@echo "... src/convert_common.i"
+	@echo "... src/convert_common.s"
+	@echo "... src/map/map_check_jsion.o"
+	@echo "... src/map/map_check_jsion.i"
+	@echo "... src/map/map_check_jsion.s"
+	@echo "... src/map/map_encode.o"
+	@echo "... src/map/map_encode.i"
+	@echo "... src/map/map_encode.s"
+	@echo "... src/map/map_print.o"
+	@echo "... src/map/map_print.i"
+	@echo "... src/map/map_print.s"
+	@echo "... src/rsi/rsi_about.o"
+	@echo "... src/rsi/rsi_about.i"
+	@echo "... src/rsi/rsi_about.s"
 .PHONY : help
 
 

@@ -171,6 +171,9 @@ ltevTool_BINARY_DIR:STATIC=/home/chen/Desktop/ltev_tool/2020/build
 //Value Computed by CMake
 ltevTool_SOURCE_DIR:STATIC=/home/chen/Desktop/ltev_tool/2020
 
+//Dependencies for target
+ltev_asn_2020_LIB_DEPENDS:STATIC=
+
 
 ########################
 # INTERNAL cache entries

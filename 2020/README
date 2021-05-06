@@ -1,4 +1,4 @@
-ltev_tool:json 转 asn的per编码,并保存到本地文件,协议为2017版本
+ltev_tool:json 转 asn的per编码,并保存到本地文件,协议为2020新4跨版本
 
 
 编译:            
@@ -9,10 +9,4 @@ ltev_tool:json 转 asn的per编码,并保存到本地文件,协议为2017版本
 
 
 
-
-
-------------------------------------------------
-changes:
-	2019.09.18 : 1.修改打印信息，便于理解 (map中的speedLimit的speed,rsi中的alertRadius)
-				 2.help信息改为中文
 

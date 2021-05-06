@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include "common.h"
-#include "msg_common.h"
+#include "convert_common.h"
 
 
 #define POINTTYPE_COUNT 7
