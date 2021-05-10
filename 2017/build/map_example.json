@@ -18,10 +18,10 @@
 					"//laneWidth" : 350,
 					"//speedLimits" : [ {"type":3,"speed":30.1},{"type":4,"speed":34.1} ],
 					"//movements" : [{"remoteIntersection":{"id":123,"//region":0},"//phaseId":4}],
-                    	"points" : [
-                          	{"lng":1128677100,"lat":281141900} ,
-				{"lng":1128675200,"lat":281138600} 
-                            ],
+                    "//points" : [
+                          {"lng":1128677100,"lat":281141900} ,
+						  {"lng":1128675200,"lat":281138600} 
+                        ],
 					"lanes" : [
 						{
 							"laneID" : 1,

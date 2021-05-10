@@ -29,7 +29,7 @@ PositionOffsetLL_PR getOffsetLL(long ref_lng, long ref_lat, long lng, long lat, 
     int lng_indx = -1,lat_index = -1;
     int abs_max = lng_abs > lat_abs ? lng_abs : lat_abs;
     for(i=0;i<POINTTYPE_COUNT;i++){
-        if(abs_max <= s_max[i]){present = i+1;break;}
+        if(abs_max <= s_max[i]){present = (PositionOffsetLL_PR)(i+1);break;}
     }
 
     if( present < PositionOffsetLL_PR_position_LatLon ) {
@@ -136,8 +136,8 @@ char *getPoint(PositionOffsetLLV_t *point, long *lng, long *lat)
 int jsonStrLenRange(cJSON *json,int min,int max,char *pre,char *keyname)
 {
     int ret = -1 ;
-    char *value = NULL;
-    if(json == NULL){
+    char *value = nullptr;
+    if(json == nullptr){
         myerr("%s error, no %s\n",pre,keyname);
         return ret;
     }
@@ -154,7 +154,7 @@ int jsonStrLenRange(cJSON *json,int min,int max,char *pre,char *keyname)
 int jsonIntRange(cJSON *json, int min, int max, char *pre,char *keyname)
 {
     int ret = -1, value;
-    if(json == NULL){
+    if(json == nullptr){
         myerr("%s error, no %s\n",pre,keyname);
         return ret;
     }
@@ -171,7 +171,7 @@ int jsonDoubleRange(cJSON *json, double min, double max, char *pre, char *keynam
 {
     int ret = -1;
     double value;
-    if(json == NULL){
+    if(json == nullptr){
         myerr("%s error, no %s\n",pre,keyname);
         return ret;
     }
@@ -187,7 +187,7 @@ int jsonDoubleRange(cJSON *json, double min, double max, char *pre, char *keynam
 int jsonArrayRange(cJSON *json, int min, int max, char *pre,char *keyname)
 {
     int ret = -1 , count;
-    if(json == NULL){
+    if(json == nullptr){
         myerr("%s error, no %s\n",pre,keyname);
         return ret;
     }
@@ -202,7 +202,7 @@ int jsonArrayRange(cJSON *json, int min, int max, char *pre,char *keyname)
 // 判断json元素是否存在
 int jsonExists(cJSON *json , char *pre, char *keyname){
     int ret = -1;
-    if(json == NULL){
+    if(json == nullptr){
         myerr("%s error, no %s\n",pre,keyname);
     }else{
         ret = 0;
@@ -251,7 +251,7 @@ int nodeRefIDJsonCheck(cJSON *json,int level,char *keyname)
 }
 
 // 添加 refPos
-void addRefPos(Position3Dltev_t *pos,cJSON *json,long *lng_value,long *lat_value)
+void addRefPos(Position3D_t *pos,cJSON *json,long *lng_value,long *lat_value)
 {
     int lng = cJSON_GetObjectItem(json,"lng")->valueint;
     int lat = cJSON_GetObjectItem(json,"lat")->valueint;
@@ -265,7 +265,7 @@ void addRefPos(Position3Dltev_t *pos,cJSON *json,long *lng_value,long *lat_value
 void addNodeRefId(NodeReferenceID_t *nodeId,cJSON *json)
 {
     int id_value = 0;
-    cJSON *region = NULL;
+    cJSON *region = nullptr;
     if(json){
         id_value = cJSON_GetObjectItem(json,"id")->valueint;
         region = cJSON_GetObjectItem(json,"region");
@@ -280,12 +280,12 @@ void addNodeRefId(NodeReferenceID_t *nodeId,cJSON *json)
 // 添加IA5String
 IA5String_t *addIA5String(cJSON *json)
 {
-    IA5String_t *p = NULL;
+    IA5String_t *p = nullptr;
     if(json){
-        p            = (IA5String_t *)calloc(1,sizeof (IA5String_t));
+        p            = new IA5String_t();
         char * value = json->valuestring;
         int len      = strlen(value);
-        p->buf       = calloc(1,len);
+        p->buf       = new uint8_t[len]();
         p->size      = len;
         memcpy(p->buf,value,len);
     }

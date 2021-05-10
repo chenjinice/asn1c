@@ -49,7 +49,7 @@ char *getPreSuf(int level,char *key)
 {
     int i;
     char *format;
-    static char pre[10][400] = {0};
+    static char pre[10][400] = {{0}};
     memset(pre[level],0,sizeof(pre[level]));
     for(i=0;i<level;i++){
         if(i== level-1)format = s_fix[1];
@@ -83,7 +83,7 @@ int readFile(char *path,uint8_t **buffer)
 {
     int ret = -1;
     int filesize,fd;
-    *buffer = NULL;
+    *buffer = nullptr;
 
     filesize = getFileSize(path);
     if(filesize < 0)return ret;
@@ -100,7 +100,7 @@ int readFile(char *path,uint8_t **buffer)
     if(len != filesize){
         myerr("read %s error : len = %d,filesize = %d\n",path,len,filesize);
         free(*buffer);
-        *buffer = NULL;
+        *buffer = nullptr;
         return ret;
     }
     return filesize;
@@ -129,11 +129,11 @@ void writeToFile(char *path, uint8_t *buffer, int length)
  */
 cJSON *readJson(char *path)
 {
-    cJSON *json = NULL;
+    cJSON *json = nullptr;
 
     uint8_t *buffer;
     readFile(path,&buffer);
-    if(!buffer)return NULL;
+    if(!buffer)return nullptr;
 
     json = cJSON_Parse((char *)buffer);
     free(buffer);
@@ -150,8 +150,8 @@ void decodePerFile(char *per_file)
     printf("=== decode <%s> ===\n",per_file);
 
     asn_dec_rval_t rval;
-    asn_codec_ctx_t *opt_codec_ctx = 0;
-    MessageFrame_t *msg = NULL;
+    asn_codec_ctx_t *opt_codec_ctx = nullptr;
+    MessageFrame_t *msg = nullptr;
 
     uint8_t *buffer;
     int len = readFile(per_file,&buffer);
@@ -159,7 +159,7 @@ void decodePerFile(char *per_file)
     printf("%s : file size = %d\n",per_file,len);
 
     rval = uper_decode_complete(opt_codec_ctx,&asn_DEF_MessageFrame,(void **)&msg,buffer,len);
-    free(buffer);buffer = NULL;
+    free(buffer);buffer = nullptr;
     if(rval.code != RC_OK){
         ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
         myerr("decode fail\n");
@@ -169,17 +169,17 @@ void decodePerFile(char *per_file)
     }
     asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
 
-//    switch (msg->present) {
-//    case MessageFrame_PR_mapFrame:
-//        mapPrint(msg);
-//        break;
-//    case MessageFrame_PR_rsiFrame:
-//        rsiPrint(msg);
-//        break;
-//    default:
-//        myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
-//        break;
-//    }
+    switch (msg->present) {
+        case MessageFrame_PR_mapFrame:
+            mapPrint(msg);
+            break;
+        case MessageFrame_PR_rsiFrame:
+            rsiPrint(msg);
+            break;
+        default:
+            myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
+            break;
+    }
     ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
 }
 
@@ -209,7 +209,7 @@ void encodeJsonFile(char *json_file,char *per_file)
 // asn编码 MessageFrame_t 类型数据，并将编码结果保存到文件
 void encode(char *path, MessageFrame_t *msg)
 {
-//    asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
+    asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
     uint8_t buffer[BUFF_SIZE];
     asn_enc_rval_t rval  = uper_encode_to_buffer(&asn_DEF_MessageFrame, NULL, msg, buffer, BUFF_SIZE);
     //    printf("encode size = %d \n",rval.encoded);

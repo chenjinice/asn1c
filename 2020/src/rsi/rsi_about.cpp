@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 
 #include "rsi_about.h"
-#include "msg_common.h"
+#include "convert_common.h"
 #include "common.h"
 
 
@@ -20,7 +20,7 @@ static int checkAlertPath(cJSON *json,int level,char *keyname)
 {
     int ret = -1,i,count=0;
     char *pre = getPreSuf(level,keyname);
-    char *str = NULL;
+    char *str = nullptr;
     if(json){
         if(jsonArrayRange(json,2,32,pre,keyname)!=0)return ret; // 国标 alertPath 个数: 2 - 32 , optional ， 可以没有
         count = cJSON_GetArraySize(json);
@@ -111,7 +111,7 @@ static void addAlertPath(PathPointList_t *list,cJSON *json)
 // 从文件读取 rsi 的 json 数据， 并用asn编码保存到文件
 void rsiEncode(cJSON *json, char *uper_file)
 {
-    MessageFrame_t *msgframe = NULL;
+    MessageFrame_t *msgframe = nullptr;
 
     // 检查 json 数据是否符合要求
     mylog("---check rsi json start---\n");
@@ -124,7 +124,7 @@ void rsiEncode(cJSON *json, char *uper_file)
     float radius = 0;
     msgframe = (MessageFrame_t*)calloc(1,sizeof(MessageFrame_t));
     msgframe->present = MessageFrame_PR_rsiFrame;
-    RSI_t *rsi = &msgframe->choice.rsiFrame;
+    RoadSideInformation_t *rsi = &msgframe->choice.rsiFrame;
     rsi->msgCnt = 0;
     rsi->id.buf = (uint8_t *)calloc(8,sizeof(uint8_t));
     memcpy(rsi->id.buf,&rsu_id,sizeof(rsu_id));
@@ -149,47 +149,5 @@ void rsiEncode(cJSON *json, char *uper_file)
     cJSON_Delete(json);
     ASN_STRUCT_FREE(asn_DEF_MessageFrame, msgframe);
 }
-
-
-
-// ---------------------------------- print ---------------------------------------
-
-
-// 打印 alertPath
-static void printAlertPath(PathPointList_t *alertpath,int level,int ref_lng,int ref_lat)
-{
-    int i ,count = 0;
-    char *pre = getPreSuf(level,"alertPath");
-    count = alertpath->list.count;
-    for(i=0;i<count;i++){
-        long lng,lat;
-        PositionOffsetLLV_t *point = alertpath->list.array[i];
-        char *str = getPoint(point,&lng,&lat);
-        if(point->offsetLL.present == PositionOffsetLL_PR_position_LatLon){
-            mylog("%s[%d/%d] : lng=%ld,lat=%ld (%s)\n",pre,i+1,count,lng,lat,str);
-        }else{
-            mylog("%s[%d/%d] : lng=%ld,lat=%ld (%ld,%ld) (%s)\n",pre,i+1,count,ref_lng+lng,ref_lat+lat,lng,lat,str);
-        }
-    }
-}
-
-// 打印 rsi 数据
-void rsiPrint(MessageFrame_t *msg)
-{
-    int level = 0;
-    char *pre = getPreSuf(level,"rsi");
-
-    RSI_t rsi = msg->choice.rsiFrame;
-	int count= rsi.alertPath.list.count;
-    mylog("%s : lng=%ld,lat=%ld,alertType=%ld,alertRadius=%.1fm(%ld),alertPath{%d}",pre,
-           rsi.refPos.Long,rsi.refPos.lat,rsi.alertType,rsi.alertRadius*ALERTRADIUS_RESOLUTION,rsi.alertRadius,count);
-    if(rsi.description)mylog(",%s",rsi.description->buf);
-    mylog("\n");
-    printAlertPath(&rsi.alertPath,level+1,rsi.refPos.Long,rsi.refPos.lat);
-
-    mylog("%s\n",pre);
-}
-
-
 
 

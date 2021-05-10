@@ -54,7 +54,7 @@ int refPosJsonCheck(cJSON *json, int level, char *keyname, long *lng_value, long
 int nodeRefIDJsonCheck(cJSON *json,int level,char *keyname);
 
 // common add
-void addRefPos(Position3Dltev_t *pos, cJSON *json, long *lng_value, long *lat_value);
+void addRefPos(Position3D_t *pos, cJSON *json, long *lng_value, long *lat_value);
 void addNodeRefId(NodeReferenceID_t *nodeId,cJSON *json);
 IA5String_t *addIA5String(cJSON *json);
 

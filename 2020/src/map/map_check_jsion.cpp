@@ -21,7 +21,7 @@ static int pointsJsonCheck(cJSON *json,int level,char *keyname)
 {
     int ret = -1,i,count=0;
     char *pre = getPreSuf(level,keyname);
-    char *str = NULL;
+    char *str = nullptr;
     if(json){
         if(jsonArrayRange(json,2,31,pre,keyname)!=0)return ret; // 国标 points 个数: 2 - 31 , optional ， 可以没有
         count = cJSON_GetArraySize(json);
@@ -79,17 +79,22 @@ static int lanesJsonCheck(cJSON *json,int level,char *keyname)
     if(jsonArrayRange(json,1,32,pre,keyname)!=0)return ret;  // 国标 lanes 个数: 1 - 32
     count =  cJSON_GetArraySize(json);
     for(i=0;i<count;i++){
-        char *key_laneid = "laneID" ,*key_points = "points" ,*key_con = "connectsTo" ,*key_mane = "maneuvers";
+        char *key_laneid = "laneID" ,*key_points = "points" ,*key_con = "connectsTo" ,*key_mane = "maneuvers",*key_width = "laneWidth";
         cJSON *lane = cJSON_GetArrayItem(json,i);
         cJSON *laneID = cJSON_GetObjectItem(lane,key_laneid);
         cJSON *points = cJSON_GetObjectItem(lane,key_points);
         cJSON *connectsTo = cJSON_GetObjectItem(lane,key_con);
         cJSON *maneuvers = cJSON_GetObjectItem(lane,key_mane);
+        cJSON *laneWidth = cJSON_GetObjectItem(lane,key_width);
         if(jsonIntRange(laneID,LANEID_MIN,LANEID_MAX,pre,key_laneid)!=0)return ret;
+        if(laneWidth){
+            if(jsonIntRange(laneWidth,0,LANEWIDTH_MAX,pre,key_width)!=0)return ret;
+        }
         if(maneuvers){
             if(jsonIntRange(maneuvers,0,4095,pre,key_mane)!=0)return ret;
         }
         mylog("%s[%d/%d] : laneID=%d",pre,i+1,count,laneID->valueint);
+        if(laneWidth)mylog(",laneWidth*=%d",laneWidth->valueint);
         if(maneuvers)mylog(",maneuvers*=%d",maneuvers->valueint);
         mylog("\n");
         if(connectsTo){
@@ -165,20 +170,20 @@ static int linksJsonCheck(cJSON *json,int level,char *keyname)
     }
     for(i=0;i<count;i++){
         int width = DEFAULT_LANEWIDTH;
-        char *key_up = "upstreamNodeId" , *key_width = "laneWidth" , *key_lanes = "lanes";
+        char *key_up = "upstreamNodeId" , *key_width = "linkWidth" , *key_lanes = "lanes";
         char *key_move = "movements" , *key_limit = "speedLimits", *key_points = "points";
         cJSON *link = cJSON_GetArrayItem(json,i);
         cJSON *upstreamNodeId = cJSON_GetObjectItem(link,key_up);
-        cJSON *laneWidth = cJSON_GetObjectItem(link,key_width);
+        cJSON *linkWidth = cJSON_GetObjectItem(link,key_width);
         cJSON *lanes = cJSON_GetObjectItem(link,key_lanes);
         cJSON *speedLimits = cJSON_GetObjectItem(link,key_limit);
         cJSON *movements = cJSON_GetObjectItem(link,key_move);
         cJSON *points    = cJSON_GetObjectItem(link,key_points);
-        if(laneWidth){
-            if(jsonIntRange(laneWidth,0,LANEWIDTH_MAX,pre,key_width)!=0)return ret;
-            width = laneWidth->valueint;
+        if(linkWidth){
+            if(jsonIntRange(linkWidth,0,LANEWIDTH_MAX,pre,key_width)!=0)return ret;
+            width = linkWidth->valueint;
         }
-        mylog("%s*[%d/%d] : laneWidth=%d\n",pre,i+1,count,width);
+        mylog("%s*[%d/%d] : linkWidth=%d\n",pre,i+1,count,width);
 
         if(upstreamNodeId){
             if(nodeRefIDJsonCheck(upstreamNodeId,level+1,key_up)!=0)return ret;

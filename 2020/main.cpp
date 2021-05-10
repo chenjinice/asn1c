@@ -13,7 +13,7 @@ static void show_useage(){
     printf("  -d perFile : 解码per文件\n");
     printf("  -e jsonFile perFile : 读取json文件，编码并保存到per文件\n");
     printf("修改记录:\n"\
-           "  2021.05.06-rsi添加description，修改经纬度点转换的隐藏bug\n"\
+           "  2021.05.10\n"\
            );
 }
 
@@ -22,18 +22,15 @@ static void show_useage(){
 int main(int argc,char *argv[])
 {
     int opt;
-    char *string = (char *)":e:d:l:";
+    char *string = (char *)":e:d:";
 
-    /*
     while ((opt = getopt(argc, argv, string)) != -1){
         switch (opt) {
-        case 'e': encodeJsonFile(optarg,argv[optind]); break;
-        case 'd': decodePerFile(optarg); break;
-        case 'l': decodePerFile(optarg); break;
-        default : show_useage(); break;
+            case 'e': encodeJsonFile(optarg,argv[optind]); break;
+            case 'd': decodePerFile(optarg); break;
+            default : show_useage(); break;
         }
     }
-*/
 
     if(argc < 2)show_useage();
 

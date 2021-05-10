@@ -28,7 +28,6 @@ add_executable(${TARGET}
     src/convert_common.cpp
     src/map/map_check_jsion.cpp
     src/map/map_encode.cpp
-    src/map/map_print.cpp
     src/rsi/rsi_about.cpp
 )
 

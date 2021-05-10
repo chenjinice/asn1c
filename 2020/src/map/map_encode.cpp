@@ -28,7 +28,7 @@ static void addPoints(PointList_t *list,cJSON *json)
         int lng = cJSON_GetObjectItem(point,"lng")->valueint;
         int lat = cJSON_GetObjectItem(point,"lat")->valueint;
         long lng_offset,lat_offset;
-        PositionOffsetLL_PR point_type = getOffsetLL(s_lng,s_lat,lng,lat,&lng_offset,&lat_offset,NULL);
+        PositionOffsetLL_PR point_type = getOffsetLL(s_lng,s_lat,lng,lat,&lng_offset,&lat_offset,nullptr);
         setOffsetLL(&road_point->posOffset,lng_offset,lat_offset,point_type);
         ASN_SET_ADD(&list->list,road_point);
     }
@@ -70,7 +70,12 @@ static void addLanes(LaneList_t *list, cJSON *json)
         cJSON *points = cJSON_GetObjectItem(lane,"points");
         cJSON *connectsTo = cJSON_GetObjectItem(lane,"connectsTo");
         cJSON *maneuvers = cJSON_GetObjectItem(lane,"maneuvers");
+        cJSON *laneWidth = cJSON_GetObjectItem(lane,"laneWidth");
         map_lane->laneID = id;
+        if(laneWidth){
+            map_lane->laneWidth     = (LaneWidth_t *)calloc(1,sizeof(LaneWidth_t));
+            *(map_lane->laneWidth)  = laneWidth->valueint;
+        }
         if(points){
             PointList_t *pointlist = (PointList_t *)calloc(1,sizeof(PointList_t));
             map_lane->points = pointlist;
@@ -146,13 +151,12 @@ static void addLinks(LinkList_t *list,cJSON *json)
         cJSON *link = cJSON_GetArrayItem(json,i);
         Link_t *map_link = (Link_t *)calloc(1,sizeof(Link_t));
         cJSON *upstreamNodeId = cJSON_GetObjectItem(link,"upstreamNodeId");
-        cJSON *laneWidth = cJSON_GetObjectItem(link,"laneWidth");
+        cJSON *linkWidth = cJSON_GetObjectItem(link,"linkWidth");
         cJSON *lanes = cJSON_GetObjectItem(link,"lanes");
         cJSON *speedlimits = cJSON_GetObjectItem(link,"speedLimits");
         cJSON *movements = cJSON_GetObjectItem(link,"movements");
         cJSON *points    = cJSON_GetObjectItem(link,"points");
-        if(laneWidth)width = laneWidth->valueint;
-        map_link->laneWidth = width;
+        if(linkWidth)map_link->linkWidth = linkWidth->valueint;
         addNodeRefId(&map_link->upstreamNodeId,upstreamNodeId);
         addLanes(&map_link->lanes,lanes);
         if(speedlimits){
@@ -175,7 +179,7 @@ static void addLinks(LinkList_t *list,cJSON *json)
 }
 
 // 给 map 添加 lane
-static void addNodes(NodeListltev_t *list,cJSON *json)
+static void addNodes(NodeList_t *list,cJSON *json)
 {
     int i,count;
     count = cJSON_GetArraySize(json);
@@ -199,7 +203,7 @@ static void addNodes(NodeListltev_t *list,cJSON *json)
 // 读取文件中的json数据，asn编码并保存到文件
 void mapEncode(cJSON *json, char *uper_file)
 {
-    MessageFrame_t *msgframe = NULL;
+    MessageFrame_t *msgframe = nullptr;
 
     // 检查 json 文件是否符合 map 数据的要求
     mylog("---check map json start---\n");
@@ -208,9 +212,9 @@ void mapEncode(cJSON *json, char *uper_file)
     if(ret == 0)myok("check json ok\n");
     else{myerr("check json error\n");return;}
 
-    msgframe = (MessageFrame_t*)calloc(1,sizeof(MessageFrame_t));
-    msgframe->present = MessageFrame_PR_mapFrame;
-    MAP_t *map = &msgframe->choice.mapFrame;
+    msgframe            = (MessageFrame_t*)calloc(1,sizeof(MessageFrame_t));
+    msgframe->present   = MessageFrame_PR_mapFrame;
+    MapData_t *map      = &msgframe->choice.mapFrame;
     map->msgCnt = 0;
 
     cJSON *nodes = cJSON_GetObjectItem(json,"nodes");
