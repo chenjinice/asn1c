@@ -27,9 +27,11 @@ static void addPoints(PointList_t *list,cJSON *json)
         RoadPoint_t *road_point = (RoadPoint_t *)calloc(1,sizeof(RoadPoint_t));
         int lng = cJSON_GetObjectItem(point,"lng")->valueint;
         int lat = cJSON_GetObjectItem(point,"lat")->valueint;
-        long lng_offset,lat_offset;
-        PositionOffsetLL_PR point_type = getOffsetLL(s_lng,s_lat,lng,lat,&lng_offset,&lat_offset,nullptr);
-        setOffsetLL(&road_point->posOffset,lng_offset,lat_offset,point_type);
+//        long lng_offset,lat_offset;
+//        PositionOffsetLL_PR point_type = getOffsetLL(s_lng,s_lat,lng,lat,&lng_offset,&lat_offset,nullptr);
+//        setOffsetLL(&road_point->posOffset,lng_offset,lat_offset,point_type);
+        setOffsetLL(&road_point->posOffset,lng,lat,PositionOffsetLL_PR_position_LatLon);
+
         ASN_SET_ADD(&list->list,road_point);
     }
 }
@@ -64,6 +66,7 @@ static void addLanes(LaneList_t *list, cJSON *json)
     int i ,count;
     count =  cJSON_GetArraySize(json);
     for(i=0;i<count;i++){
+        int width = DEFAULT_LANEWIDTH;
         cJSON *lane = cJSON_GetArrayItem(json,i);
         Lane_t *map_lane = (Lane_t *)calloc(1,sizeof(Lane_t));
         int id = cJSON_GetObjectItem(lane,"laneID")->valueint;
@@ -73,8 +76,9 @@ static void addLanes(LaneList_t *list, cJSON *json)
         cJSON *laneWidth = cJSON_GetObjectItem(lane,"laneWidth");
         map_lane->laneID = id;
         if(laneWidth){
+            width                   = laneWidth->valueint;
             map_lane->laneWidth     = (LaneWidth_t *)calloc(1,sizeof(LaneWidth_t));
-            *(map_lane->laneWidth)  = laneWidth->valueint;
+            *(map_lane->laneWidth)  = width;
         }
         if(points){
             PointList_t *pointlist = (PointList_t *)calloc(1,sizeof(PointList_t));
@@ -156,7 +160,8 @@ static void addLinks(LinkList_t *list,cJSON *json)
         cJSON *speedlimits = cJSON_GetObjectItem(link,"speedLimits");
         cJSON *movements = cJSON_GetObjectItem(link,"movements");
         cJSON *points    = cJSON_GetObjectItem(link,"points");
-        if(linkWidth)map_link->linkWidth = linkWidth->valueint;
+        if(linkWidth)width  = linkWidth->valueint;
+        map_link->linkWidth = width;
         addNodeRefId(&map_link->upstreamNodeId,upstreamNodeId);
         addLanes(&map_link->lanes,lanes);
         if(speedlimits){
