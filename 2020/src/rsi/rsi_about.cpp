@@ -2,74 +2,130 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/stat.h>
-
 #include "rsi_about.h"
 #include "convert_common.h"
 #include "common.h"
 
 
-static long s_lng = 0;
-static long s_lat = 0;
+const int res_pos = 1e7;
 
 
-// ---------------------------------- check ---------------------------------------
+cJSON *getItem(cJSON *json , string key,bool required = true){
+    cJSON *tmp = cJSON_GetObjectItem(json,key.c_str());
 
-
-// 检查json 文件 alertPath
-static int checkAlertPath(cJSON *json,int level,char *keyname)
-{
-    int ret = -1,i,count=0;
-    char *pre = getPreSuf(level,keyname);
-    char *str = nullptr;
-    if(json){
-        if(jsonArrayRange(json,2,32,pre,keyname)!=0)return ret; // 国标 alertPath 个数: 2 - 32 , optional ， 可以没有
-        count = cJSON_GetArraySize(json);
+    if(tmp == nullptr && required){
+        myerr("no %s\n",key.c_str());
     }
-    for(i=0;i<count;i++){
-        char *key_lng = "lng" ,*key_lat = "lat";
-        cJSON *point = cJSON_GetArrayItem(json,i);
-        cJSON *lng = cJSON_GetObjectItem(point,key_lng);
-        cJSON *lat = cJSON_GetObjectItem(point,key_lat);
-        if(jsonIntRange(lng,-LNG_MAX,LNG_MAX,pre,key_lng)!=0)return ret;
-        if(jsonIntRange(lat,-LAT_MAX,LAT_MAX,pre,key_lat)!=0)return ret;
-        long lng_int = lng->valueint,lat_int = lat->valueint,lng_offset ,lat_offset;
-        getOffsetLL(s_lng,s_lat,lng_int,lat_int,&lng_offset,&lat_offset,&str);
-        mylog("%s[%d/%d] : lng=%d,lat=%d (%d,%d) (%s)\n",pre,i+1,count,lng_int,lat_int,lng_offset,lat_offset,str);
-    }
-    return 0;
+    return tmp;
 }
 
-// 检查 rsi 的 json 文件数据是否符合要求
-static int rsiJsonCheck(cJSON *json)
-{
-    int ret = -1,level = 0 , radius_int = 0;
-    char *pre = getPreSuf(level,"rsi");
 
-    float radius = 0;
-    char *key_pos = "refPos" ,*key_type ="alertType" ,*key_radius = "alertRadius" ,*key_path = "alertPath";
-    char *key_des = "description";
-    cJSON *refPos           = cJSON_GetObjectItem(json,key_pos);
-    cJSON *alertType        = cJSON_GetObjectItem(json,key_type);
-    cJSON *alertRadius      = cJSON_GetObjectItem(json,key_radius);
-    cJSON *alertPath        = cJSON_GetObjectItem(json,key_path);
-    cJSON *description      = cJSON_GetObjectItem(json,key_des);
-    if(jsonIntRange(alertType,0,U16_MAX,pre,key_type)!=0)return ret;
-    if(jsonDoubleRange(alertRadius,0,ALERTRADIUS_MAX,pre,key_radius)!=0)return ret;
-    radius = alertRadius->valuedouble;
-	float tmp = radius/ALERTRADIUS_RESOLUTION;
-	radius_int = tmp;
-    mylog("%s : alertType=%d,alertRadius=%.1fm(%d)",pre,alertType->valueint,radius,radius_int);
-    if(description){
-        mylog(",description=%s",description->valuestring);
-        if(jsonStrLenRange(description,1,256,pre,key_des)!=0)return ret;
+// ---------------------------------- json to local ---------------------------------------
+
+bool posToLocal(cJSON *json,PosWGS84 &pos){
+    if(!json)return false;
+    cJSON *lng = getItem(json,"lng");
+    cJSON *lat = getItem(json,"lat");
+    if(lng == nullptr)return false;
+    if(lat == nullptr)return false;
+
+    pos.lng = lng->valuedouble;
+    pos.lat = lat->valuedouble;
+    return true;
+}
+
+bool pointsToLocal(cJSON *json,vector<PosWGS84> &v){
+    bool ret            = false;
+    if(!json)return ret;
+    int count           = cJSON_GetArraySize(json);
+    for(int i=0;i<count;i++){
+        PosWGS84 l_point;
+        cJSON * point   = cJSON_GetArrayItem(json,i);
+
+        if( !posToLocal(point,l_point) )return ret;
+        v.push_back(l_point);
     }
-    mylog("\n");
-    if(refPosJsonCheck(refPos,level+1,key_pos,&s_lng,&s_lat)!=0)return ret;
-    if(alertPath){
-        if(checkAlertPath(alertPath,level+1,key_path)!=0)return ret;
+    return true;
+}
+
+bool refPathsToLocal(cJSON *json,vector<LocalRefPath> &v){
+    bool ret                = false;
+    if(!json)return ret;
+    int count               = cJSON_GetArraySize(json);
+    for(int i=0;i<count;i++){
+        LocalRefPath l_path;
+        cJSON * path        = cJSON_GetArrayItem(json,i);
+        cJSON * activePath  = getItem(path,"activePath");
+        cJSON * pathRadius  = getItem(path,"pathRadius");
+
+        if(!activePath)return ret;
+        l_path.radius       = pathRadius->valuedouble;
+
+        if( (!pathRadius) || (!pointsToLocal(activePath,l_path.points)) )return ret;
+        v.push_back(l_path);
     }
-    mylog("%s\n",pre);
-    return 0;
+    return true;
+}
+
+bool rtesToLocal(cJSON *json,vector<LocalRtes> &v){
+    bool ret            = false;
+    if(!json)return ret;
+    int count           = cJSON_GetArraySize(json);
+    for(int i=0;i<count;i++){
+        LocalRtes  l_rte;
+        cJSON *rte      = cJSON_GetArrayItem(json,i);
+        cJSON *type     = getItem(rte,"eventType");
+        cJSON *des      = getItem(rte,"description",false);
+        cJSON *eventPos = getItem(rte,"eventPos",false);
+        cJSON *paths    = getItem(rte,"referencePaths",false);
+
+        if(!type)return ret;
+
+        l_rte.type      = type->valueint;
+        if(des)l_rte.des= des->valuestring;
+        if( eventPos && (!posToLocal(eventPos,l_rte.event_pos)) )return ret;
+        if( paths    && (!refPathsToLocal(paths,l_rte.paths))   )return ret;
+        v.push_back(l_rte);
+    }
+    return true;
+}
+
+bool rtssToLocal(cJSON *json,vector<LocalRtss> &v){
+    bool ret            = false;
+    if(!json)return ret;
+    int count           = cJSON_GetArraySize(json);
+    for(int i=0;i<count;i++){
+        LocalRtss  l_rts;
+        cJSON *rts      = cJSON_GetArrayItem(json,i);
+        cJSON *type     = getItem(rts,"signType");
+        cJSON *des      = getItem(rts,"description",false);
+        cJSON *signPos  = getItem(rts,"signPos",false);
+        cJSON *paths    = getItem(rts,"referencePaths",false);
+
+        if(!type)return ret;
+
+        l_rts.type      = type->valueint;
+        if(des)l_rts.des= des->valuestring;
+        if( signPos && (!posToLocal(signPos,l_rts.sign_pos)) )return ret;
+        if( paths   && (!refPathsToLocal(paths,l_rts.paths)) )return ret;
+        v.push_back(l_rts);
+    }
+    return true;
+}
+
+//  rsi的json转本地
+static bool rsiToLocal(cJSON *json,LocalRsi &rsi)
+{
+    bool    ret             = false;
+    cJSON *refPos           = getItem(json,"refPos");
+    cJSON *rtss             = getItem(json,"rtss",false);
+    cJSON *rtes             = getItem(json,"rtes",false);
+
+    if( !posToLocal(refPos,rsi.pos) )return ret;
+    if( rtss && (!rtssToLocal(rtss,rsi.rtss)) )return ret;
+    if( rtes && (!rtesToLocal(rtes,rsi.rtes)) )return ret;
+
+    return true;
 }
 
 
@@ -78,75 +134,67 @@ static int rsiJsonCheck(cJSON *json)
 
 // ---------------------------------- add ---------------------------------------
 
-// 添加 alertPath
-static void addAlertPath(PathPointList_t *list,cJSON *json)
+void setRefPos(const PosWGS84 &l,Position3D_t &p)
 {
-    int i , count =  0;
-    if(json)count = cJSON_GetArraySize(json);
-    if(count > 0){
-        for(i=0;i<count;i++){
-            cJSON *point = cJSON_GetArrayItem(json,i);
-            PositionOffsetLLV_t *alert_point = (PositionOffsetLLV_t *)calloc(1,sizeof(PositionOffsetLLV_t));
-            int lng = cJSON_GetObjectItem(point,"lng")->valueint;
-            int lat = cJSON_GetObjectItem(point,"lat")->valueint;
-            long lng_offset,lat_offset;
-            PositionOffsetLL_PR point_type = getOffsetLL(s_lng,s_lat,lng,lat,&lng_offset,&lat_offset,NULL);
-            setOffsetLL(alert_point,lng_offset,lat_offset,point_type);
-            ASN_SET_ADD(&list->list,alert_point);
-        }
-    }else{
-        for(i = 0;i<2;i++)
-        {
-            PositionOffsetLLV_t* alert_point;
-            alert_point  = (PositionOffsetLLV_t *)calloc(1,sizeof(PositionOffsetLLV_t));
-            alert_point->offsetLL.present = PositionOffsetLL_PR_position_LL1;
-            alert_point->offsetLL.choice.position_LL1.lat = 0;
-            alert_point->offsetLL.choice.position_LL1.lon = 0;
-            ASN_SET_ADD(&list->list,alert_point);
-        }
-    }
+    p.Long = l.lng *res_pos;
+    p.lat  = l.lat *res_pos;
+}
 
+void setId(const string &l,OCTET_STRING &id)
+{
+    int len     = 8;
+    id.buf      = new uint8_t[len]();
+    id.size     = len;
+
+    int data_len = l.length();
+    int copy_len = data_len > len ? len : data_len;
+    memcpy(id.buf,l.data(),copy_len);
+}
+
+void setoffsetPos(const PosWGS84 &l,PositionOffsetLLV &offset)
+{
+    offset.offsetLL.present = PositionOffsetLL_PR_position_LatLon;
+    offset.offsetLL.choice.position_LatLon.lon = l.lng;
+    offset.offsetLL.choice.position_LatLon.lat = l.lat;
+}
+
+void setRtss(const vector<LocalRtss> &v,RTSList *rtss)
+{
+    int count = v.size();
+    for(int i=0;i<count;i++){
+        const LocalRtss &l  = v[i];
+        RTSData *rts        = new RTSData();
+        rts->rtsId          = 0;
+        rts->signType       = l.type;
+        rts->signPos;
+
+        ASN_SET_ADD(&rtss->list,rts);
+    }
 }
 
 // 从文件读取 rsi 的 json 数据， 并用asn编码保存到文件
 void rsiEncode(cJSON *json, char *uper_file)
 {
-    MessageFrame_t *msgframe = nullptr;
+    // json 转本地
+    LocalRsi l;
+    if( !rsiToLocal(json,l) ){ myerr("rsiToLocal error\n");return; }
+    cJSON_Delete(json);
 
-    // 检查 json 数据是否符合要求
-    mylog("---check rsi json start---\n");
-    int ret = rsiJsonCheck(json);
-    mylog("---check rsi json end---\n");
-    if(ret == 0)myok("check json ok\n");
-    else{myerr("check json error\n");return;}
+    l.show();
 
-    int rsu_id = 0;
-    float radius = 0;
-    msgframe = (MessageFrame_t*)calloc(1,sizeof(MessageFrame_t));
-    msgframe->present = MessageFrame_PR_rsiFrame;
-    RoadSideInformation_t *rsi = &msgframe->choice.rsiFrame;
-    rsi->msgCnt = 0;
-    rsi->id.buf = (uint8_t *)calloc(8,sizeof(uint8_t));
-    memcpy(rsi->id.buf,&rsu_id,sizeof(rsu_id));
-    rsi->id.size = 8;
-    rsi->rsiId = 0;
+    MessageFrame_t * msgframe   = new MessageFrame_t();
+    msgframe->present           = MessageFrame_PR_rsiFrame;
+    RoadSideInformation_t *rsi  = &msgframe->choice.rsiFrame;
 
-    cJSON *refPos           = cJSON_GetObjectItem(json,"refPos");
-    int alertType           = cJSON_GetObjectItem(json,"alertType")->valueint;
-    cJSON *alertRadius      = cJSON_GetObjectItem(json,"alertRadius");
-    cJSON *alertPath        = cJSON_GetObjectItem(json,"alertPath");
-    cJSON *description      = cJSON_GetObjectItem(json,"description");
-    if(alertRadius)radius   = alertRadius->valuedouble;
-    rsi->alertType = alertType;  // 警告类型
-	float tmp = radius/ALERTRADIUS_RESOLUTION;
-    rsi->alertRadius = tmp; //国标分辨率是 10 cm,json文件里边是m,要转换
-    rsi->description = addIA5String(description);
+    setId(l.id,rsi->id);
+    setRefPos(l.pos,rsi->refPos);
 
-    addRefPos(&rsi->refPos,refPos,&s_lng,&s_lat);
-    addAlertPath(&rsi->alertPath,alertPath);
+    if(l.rtss.size() > 0){
+        RTSList *rtss           = new RTSList();
+        setRtss(l.rtss,rsi->rtss);
+    }
 
     encode(uper_file,msgframe);
-    cJSON_Delete(json);
     ASN_STRUCT_FREE(asn_DEF_MessageFrame, msgframe);
 }
 

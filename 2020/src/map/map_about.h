@@ -7,7 +7,6 @@
 
 
 int  mapJsonCheck(cJSON *json);
-void mapPrint(MessageFrame_t *msg);
 void mapEncode(cJSON *json, char *uper_file);
 
 

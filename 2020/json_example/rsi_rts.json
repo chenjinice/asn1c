@@ -1,0 +1,31 @@
+{
+	"1" :" signType , 35 代表前方施工",
+	"2" : "pathRadius ,影响半径,0 ~ 102.4 米",
+
+	"关于rsi" : "前方施工的rsi",
+
+
+	"type"   : "rsi",
+	"refPos" : {"lng":111.1234567,"lat":22.1234567},
+    "rtss"   : [
+        {
+            "signType"      : 35,
+            "signPos"       : {"lng":111.1234567,"lat":22.1234567},
+            "description"   : "cidi",
+            "referencePaths": [
+                {
+                    "pathRadius" : 3.5,
+                    "activePath" : [
+                        {"lng":111.1234567,"lat":20.1234567},
+                        {"lng":111.1234567,"lat":22.1234567}
+                    ]
+                }
+
+            ]
+        }
+
+    ]
+}
+
+
+

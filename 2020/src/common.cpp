@@ -168,18 +168,6 @@ void decodePerFile(char *per_file)
         myok("decode OK\n");
     }
     asn_fprint(stdout,&asn_DEF_MessageFrame,msg);
-
-    switch (msg->present) {
-        case MessageFrame_PR_mapFrame:
-            mapPrint(msg);
-            break;
-        case MessageFrame_PR_rsiFrame:
-            rsiPrint(msg);
-            break;
-        default:
-            myerr("decode : unknow msg type , msg->present = %d \n",msg->present);
-            break;
-    }
     ASN_STRUCT_FREE(asn_DEF_MessageFrame,msg);
 }
 
