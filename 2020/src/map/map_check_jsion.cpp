@@ -27,7 +27,7 @@ static int pointsJsonCheck(cJSON *json,int level,char *keyname)
         count = cJSON_GetArraySize(json);
     }
     for(i=0;i<count;i++){
-        char *key_lng = "lng" ,*key_lat = "lat";
+        char *key_lng = (char *)"lng" ,*key_lat = (char *)"lat";
         cJSON *point = cJSON_GetArrayItem(json,i);
         cJSON *lng = cJSON_GetObjectItem(point,key_lng);
         cJSON *lat = cJSON_GetObjectItem(point,key_lat);
@@ -50,7 +50,7 @@ static int connectsToJsonCheck(cJSON *json,int level,char *keyname)
         count =  cJSON_GetArraySize(json);
     }
     for(i=0;i<count;i++){
-        char *key_remote = "remoteIntersection",*key_con ="connectingLane",*key_phase = "phaseId";
+        char *key_remote = (char *)"remoteIntersection",*key_con =(char *)"connectingLane",*key_phase = (char *)"phaseId";
         cJSON *con = cJSON_GetArrayItem(json,i);
         cJSON *remoteIntersection = cJSON_GetObjectItem(con,key_remote);
         cJSON *connectingLane = cJSON_GetObjectItem(con,key_con);
@@ -79,7 +79,8 @@ static int lanesJsonCheck(cJSON *json,int level,char *keyname)
     if(jsonArrayRange(json,1,32,pre,keyname)!=0)return ret;  // 国标 lanes 个数: 1 - 32
     count =  cJSON_GetArraySize(json);
     for(i=0;i<count;i++){
-        char *key_laneid = "laneID" ,*key_points = "points" ,*key_con = "connectsTo" ,*key_mane = "maneuvers",*key_width = "laneWidth";
+        char *key_laneid = (char *)"laneID" ,*key_points = (char *)"points" ,*key_con = (char *)"connectsTo" ;
+        char *key_mane = (char *)"maneuvers",*key_width = (char *)"laneWidth";
         cJSON *lane = cJSON_GetArrayItem(json,i);
         cJSON *laneID = cJSON_GetObjectItem(lane,key_laneid);
         cJSON *points = cJSON_GetObjectItem(lane,key_points);
@@ -118,7 +119,7 @@ static int speedLimitsJsonCheck(cJSON *json,int level,char *keyname)
         count =  cJSON_GetArraySize(json);
     }
     for(i=0;i<count;i++){
-        char *key_type = "type" ,*key_speed = "speed";
+        char *key_type = (char *)"type" ,*key_speed = (char *)"speed";
         cJSON *limit = cJSON_GetArrayItem(json,i);
         cJSON *type = cJSON_GetObjectItem(limit,key_type);
         cJSON *speed = cJSON_GetObjectItem(limit,key_speed);
@@ -144,7 +145,7 @@ static int movementsJsonCheck(cJSON *json,int level,char *keyname)
         count =  cJSON_GetArraySize(json);
     }
     for(i=0;i<count;i++){
-        char *key_remote = "remoteIntersection" , *key_phase = "phaseId";
+        char *key_remote = (char *)"remoteIntersection" , *key_phase = (char *)"phaseId";
         cJSON *move = cJSON_GetArrayItem(json,i);
         cJSON *remoteIntersection = cJSON_GetObjectItem(move,key_remote);
         cJSON *phaseId = cJSON_GetObjectItem(move,key_phase);
@@ -170,8 +171,8 @@ static int linksJsonCheck(cJSON *json,int level,char *keyname)
     }
     for(i=0;i<count;i++){
         int width = DEFAULT_LANEWIDTH;
-        char *key_up = "upstreamNodeId" , *key_width = "linkWidth" , *key_lanes = "lanes";
-        char *key_move = "movements" , *key_limit = "speedLimits", *key_points = "points";
+        char *key_up = (char *)"upstreamNodeId" , *key_width = (char *)"linkWidth" , *key_lanes = (char *)"lanes";
+        char *key_move = (char *)"movements" , *key_limit = (char *)"speedLimits", *key_points = (char *)"points";
         cJSON *link = cJSON_GetArrayItem(json,i);
         cJSON *upstreamNodeId = cJSON_GetObjectItem(link,key_up);
         cJSON *linkWidth = cJSON_GetObjectItem(link,key_width);
@@ -212,7 +213,7 @@ static int nodesJsonCheck(cJSON *json,int level,char *keyname)
     if(jsonArrayRange(json,1,32,pre,keyname)!=0)return ret; // 国标 nodes 个数: 1 - 32
     count = cJSON_GetArraySize(json);
     for(i=0;i<count;i++){
-        char *key_id ="id",*key_pos = "refPos" , *key_links = "links";
+        char *key_id = (char *)"id",*key_pos = (char *)"refPos" , *key_links = (char *)"links";
         cJSON *node = cJSON_GetArrayItem(json,i);
         cJSON *id = cJSON_GetObjectItem(node,key_id);
         cJSON *refPos = cJSON_GetObjectItem(node,key_pos);
@@ -231,10 +232,10 @@ static int nodesJsonCheck(cJSON *json,int level,char *keyname)
 int mapJsonCheck(cJSON *json)
 {
     int ret = -1,level = 0;
-    char *pre = getPreSuf(level,"map");
+    char *pre = getPreSuf(level,(char *)"map");
     mylog("%s : \n",pre);
 
-    char *key = "nodes";
+    char *key = (char *)"nodes";
     cJSON *nodes = cJSON_GetObjectItem(json,key);
     if(nodesJsonCheck(nodes,level+1,key)!=0)return ret;
     mylog("%s\n",pre);

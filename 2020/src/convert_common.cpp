@@ -217,7 +217,7 @@ int refPosJsonCheck(cJSON *json,int level,char *keyname,long *lng_value,long *la
     char *pre = getPreSuf(level,keyname);
     if(jsonExists(json,pre,keyname)!=0)return ret;
 
-    char *key_lng = "lng", *key_lat = "lat";
+    char *key_lng = (char *)"lng", *key_lat = (char *)"lat";
     cJSON *lng = cJSON_GetObjectItem(json,key_lng);
     cJSON *lat = cJSON_GetObjectItem(json,key_lat);
     if(jsonIntRange(lng,-LNG_MAX,LNG_MAX,pre,key_lng)!=0)return ret;
@@ -236,7 +236,7 @@ int nodeRefIDJsonCheck(cJSON *json,int level,char *keyname)
 
     if(jsonExists(json,pre,keyname)!=0)return ret;
 
-    char *key_id = "id", *key_region = "region";
+    char *key_id = (char *)"id", *key_region = (char *)"region";
     cJSON *id = cJSON_GetObjectItem(json,key_id);
     cJSON *region = cJSON_GetObjectItem(json,key_region);
     if(jsonIntRange(id,NODEID_MIN,NODEID_MAX,pre,key_id)!=0)return ret;

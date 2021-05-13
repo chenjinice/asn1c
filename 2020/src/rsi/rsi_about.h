@@ -46,6 +46,7 @@ public:
     }
     int                     rte_id              = 0;
     int                     type                = 0;        // GB/T 29100-2012
+    int                     source              = 0;        // 信息来源
     string                  des;                            // description
     PosWGS84                event_pos;
     vector<LocalRefPath>    paths;                          // ReferencePath,影响路径

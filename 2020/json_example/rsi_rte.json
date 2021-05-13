@@ -1,6 +1,8 @@
 {
 	"1" :" eventType , 707 代表前方拥堵",
-	"2" : "pathRadius ,影响半径,0 ~ 102.4 米",
+    "2" : "eventType , GB/T 29100-2012",
+	"3" : "pathRadius ,影响半径,0 ~ 6553.5 米",
+    "4" : "eventSource ,unknown(0),police(1),government(2),meteorological(3),internet(4),detection(5)",
 
 	"关于rsi" : "前方拥堵的rsi",
 
@@ -11,6 +13,7 @@
         {
             "eventType"     : 707,
             "eventPos"      : {"lng":111.1234567,"lat":22.1234567},
+            "eventSource"   : 0,
             "description"   : "cidi",
             "referencePaths": [
                 {

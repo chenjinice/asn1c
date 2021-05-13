@@ -7,7 +7,8 @@
 #include "common.h"
 
 
-const int res_pos = 1e7;
+const double res_pos     = 1e-7;
+const double res_radius  = 0.1;
 
 
 cJSON *getItem(cJSON *json , string key,bool required = true){
@@ -75,13 +76,16 @@ bool rtesToLocal(cJSON *json,vector<LocalRtes> &v){
         LocalRtes  l_rte;
         cJSON *rte      = cJSON_GetArrayItem(json,i);
         cJSON *type     = getItem(rte,"eventType");
+        cJSON *source   = getItem(rte,"eventSource");
         cJSON *des      = getItem(rte,"description",false);
         cJSON *eventPos = getItem(rte,"eventPos",false);
         cJSON *paths    = getItem(rte,"referencePaths",false);
 
-        if(!type)return ret;
+        if(!type)   return ret;
+        if(!source)return ret;
 
         l_rte.type      = type->valueint;
+        l_rte.source    = source->valueint;
         if(des)l_rte.des= des->valuestring;
         if( eventPos && (!posToLocal(eventPos,l_rte.event_pos)) )return ret;
         if( paths    && (!refPathsToLocal(paths,l_rte.paths))   )return ret;
@@ -136,8 +140,8 @@ static bool rsiToLocal(cJSON *json,LocalRsi &rsi)
 
 void setRefPos(const PosWGS84 &l,Position3D_t &p)
 {
-    p.Long = l.lng *res_pos;
-    p.lat  = l.lat *res_pos;
+    p.Long = l.lng/res_pos;
+    p.lat  = l.lat/res_pos;
 }
 
 void setId(const string &l,OCTET_STRING &id)
@@ -151,11 +155,29 @@ void setId(const string &l,OCTET_STRING &id)
     memcpy(id.buf,l.data(),copy_len);
 }
 
-void setoffsetPos(const PosWGS84 &l,PositionOffsetLLV &offset)
+void setoffsetPos(const PosWGS84 &l,PositionOffsetLLV *offset)
 {
-    offset.offsetLL.present = PositionOffsetLL_PR_position_LatLon;
-    offset.offsetLL.choice.position_LatLon.lon = l.lng;
-    offset.offsetLL.choice.position_LatLon.lat = l.lat;
+    if(!offset)return;
+    offset->offsetLL.present = PositionOffsetLL_PR_position_LatLon;
+    offset->offsetLL.choice.position_LatLon.lon = l.lng/res_pos;
+    offset->offsetLL.choice.position_LatLon.lat = l.lat/res_pos;
+}
+
+void setRefPaths(const vector<LocalRefPath> &v,ReferencePathList *paths){
+    int count = v.size();
+    for(int i=0;i<count;i++){
+        const LocalRefPath &l   = v[i];
+        ReferencePath *path     = new ReferencePath();
+        path->pathRadius        = l.radius/res_radius;
+
+        for(int k=0;k<l.points.size();k++){
+            const PosWGS84 &  l_pos = l.points[k];
+            PositionOffsetLLV * pos = new PositionOffsetLLV();
+            setoffsetPos(l_pos,pos);
+            ASN_SET_ADD(&path->activePath,pos);
+        }
+        ASN_SET_ADD(&paths->list,path);
+    }
 }
 
 void setRtss(const vector<LocalRtss> &v,RTSList *rtss)
@@ -166,9 +188,37 @@ void setRtss(const vector<LocalRtss> &v,RTSList *rtss)
         RTSData *rts        = new RTSData();
         rts->rtsId          = 0;
         rts->signType       = l.type;
-        rts->signPos;
+        rts->signPos        = new PositionOffsetLLV();
 
+        setoffsetPos(l.sign_pos,rts->signPos);
+
+        if(l.paths.size() > 0){
+            rts->referencePaths = new ReferencePathList();
+            setRefPaths(l.paths,rts->referencePaths);
+        }
         ASN_SET_ADD(&rtss->list,rts);
+    }
+}
+
+void setRtes(const vector<LocalRtes> &v,RTEList *rtes)
+{
+    int count = v.size();
+    for(int i=0;i<count;i++){
+        const LocalRtes &l  = v[i];
+        RTEData *rte        = new RTEData();
+        rte->rteId          = 0;
+        rte->eventType      = l.type;
+        rte->eventSource    = l.source;
+        rte->eventPos       = new PositionOffsetLLV();
+
+        setoffsetPos(l.event_pos,rte->eventPos);
+
+        if(l.paths.size() > 0){
+            rte->referencePaths = new ReferencePathList();
+            setRefPaths(l.paths,rte->referencePaths);
+        }
+
+        ASN_SET_ADD(&rtes->list,rte);
     }
 }
 
@@ -180,8 +230,7 @@ void rsiEncode(cJSON *json, char *uper_file)
     if( !rsiToLocal(json,l) ){ myerr("rsiToLocal error\n");return; }
     cJSON_Delete(json);
 
-    l.show();
-
+//    l.show();
     MessageFrame_t * msgframe   = new MessageFrame_t();
     msgframe->present           = MessageFrame_PR_rsiFrame;
     RoadSideInformation_t *rsi  = &msgframe->choice.rsiFrame;
@@ -190,8 +239,12 @@ void rsiEncode(cJSON *json, char *uper_file)
     setRefPos(l.pos,rsi->refPos);
 
     if(l.rtss.size() > 0){
-        RTSList *rtss           = new RTSList();
+        rsi->rtss               = new RTSList();
         setRtss(l.rtss,rsi->rtss);
+    }
+    if(l.rtes.size() > 0){
+        rsi->rtes               = new RTEList();
+        setRtes(l.rtes,rsi->rtes);
     }
 
     encode(uper_file,msgframe);

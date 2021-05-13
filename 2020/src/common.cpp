@@ -13,7 +13,7 @@
 #include "rsi_about.h"
 
 
-static char *s_fix[] = {"│ ","├ "};
+static char *s_fix[] = {(char *)"│ ",(char *)"├ "};
 
 
 // 字节按位倒序
@@ -32,10 +32,10 @@ uint8_t byteReverse(uint8_t data)
 void myprint(int type,const char *format,...)
 {
     char str[1024] = {0};
-    char *pre = "";
-    char *suf = "";
-    if(type == MY_ERR){pre = "\e[1;31m";suf = "\e[0m";}
-    if(type == MY_OK) {pre = "\e[1;32m";suf = "\e[0m";}
+    char *pre = (char *)"";
+    char *suf = (char *)"";
+    if(type == MY_ERR){pre = (char *)"\e[1;31m";suf = (char *)"\e[0m";}
+    if(type == MY_OK) {pre = (char *)"\e[1;32m";suf = (char *)"\e[0m";}
     sprintf(str,"%s%s%s",pre,format,suf);
 
     va_list ap;
