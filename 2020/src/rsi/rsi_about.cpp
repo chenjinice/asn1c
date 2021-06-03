@@ -180,6 +180,18 @@ void setRefPaths(const vector<LocalRefPath> &v,ReferencePathList *paths){
     }
 }
 
+void setDes(const string &l,Description *des)
+{
+	if(!des)return;
+	int calloc_len = l.length();
+	if(calloc_len < 1)return;
+
+	des->present                  = Description_PR_textString;
+    des->choice.textString.buf    = new uint8_t[calloc_len]();
+    des->choice.textString.size   = calloc_len;
+    memcpy(des->choice.textString.buf,l.data(),calloc_len);
+}
+
 void setRtss(const vector<LocalRtss> &v,RTSList *rtss)
 {
     int count = v.size();
@@ -189,8 +201,10 @@ void setRtss(const vector<LocalRtss> &v,RTSList *rtss)
         rts->rtsId          = 0;
         rts->signType       = l.type;
         rts->signPos        = new PositionOffsetLLV();
+		rts->description    = new Description();
 
         setoffsetPos(l.sign_pos,rts->signPos);
+		setDes(l.des,rts->description);
 
         if(l.paths.size() > 0){
             rts->referencePaths = new ReferencePathList();
@@ -210,8 +224,10 @@ void setRtes(const vector<LocalRtes> &v,RTEList *rtes)
         rte->eventType      = l.type;
         rte->eventSource    = l.source;
         rte->eventPos       = new PositionOffsetLLV();
+		rte->description    = new Description();
 
         setoffsetPos(l.event_pos,rte->eventPos);
+		setDes(l.des,rte->description);
 
         if(l.paths.size() > 0){
             rte->referencePaths = new ReferencePathList();
